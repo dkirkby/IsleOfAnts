@@ -11,7 +11,7 @@
 'use strict';
 
 // Colours that match the Tropical Terminal theme.
-const _WATER_FILL  = '#07151f';
+const _WATER_FILL  = '#0b3d5c';   // tropical ocean blue
 const _ISLAND_FILL = '#c9a84c';   // sandy yellow
 const _ANT_FILL    = '#1a0d04';   // dark brown, like a real ant
 const _ANT_GLOW    = 'rgba(0,0,0,0.35)';
@@ -41,10 +41,11 @@ class Renderer {
     const W = this._drawW || canvas.width;
     const H = this._drawH || canvas.height;
 
-    // Layout: a fixed-pixel water border around the island.
-    const PAD  = Math.round(Math.min(W, H) * 0.05);
-    const GRID = Math.min(W, H) - 2 * PAD;
-    const cell = GRID / gridSize;
+    // Layout: margin = half a cell width on each side.
+    // cell = min(W,H) / (gridSize + 1)  →  PAD = cell/2  →  GRID = cell*gridSize
+    const cell = Math.min(W, H) / (gridSize + 1);
+    const PAD  = cell / 2;
+    const GRID = cell * gridSize;
 
     // Canvas-pixel centre of grid cell (gx, gy).
     const cx = gx => PAD + (gx + 0.5) * cell;
@@ -56,8 +57,8 @@ class Renderer {
 
     // Subtle radial shimmer on water.
     const wg = ctx.createRadialGradient(W/2, H/2, GRID * 0.3, W/2, H/2, W * 0.72);
-    wg.addColorStop(0, 'rgba(14,60,80,0.0)');
-    wg.addColorStop(1, 'rgba(4,20,35,0.45)');
+    wg.addColorStop(0, 'rgba(30,110,160,0.0)');
+    wg.addColorStop(1, 'rgba(4,20,40,0.55)');
     ctx.fillStyle = wg;
     ctx.fillRect(0, 0, W, H);
 
