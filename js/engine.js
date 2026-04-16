@@ -69,16 +69,14 @@ class SimulationEngine {
     this.ants = allCells.slice(0, numAnts).map(c => ({ x: c.x, y: c.y, prevX: c.x, prevY: c.y }));
 
     // Place each anteater at a random cell (overlaps allowed).
-    this.anteaters = this.players.map(player => ({
-      player,
-      x: globalRNG.nextInt(gridSize),
-      y: globalRNG.nextInt(gridSize),
-      score: 0,
-      // Stored each turn for Dev Mode vector overlay.
-      lastNearestAnt:      null,
-      lastNearestAnteater: null,
-      lastNearestShore:    null,
-    }));
+    this.anteaters = this.players.map(player => {
+      const x = globalRNG.nextInt(gridSize);
+      const y = globalRNG.nextInt(gridSize);
+      return {
+        player, x, y, prevX: x, prevY: y, score: 0,
+        lastNearestAnt: null, lastNearestAnteater: null, lastNearestShore: null,
+      };
+    });
 
     this.turn   = 0;
     this.done   = false;
@@ -153,6 +151,8 @@ class SimulationEngine {
       }
 
       // Apply move, cancelling it if it would leave the grid.
+      eater.prevX = eater.x;
+      eater.prevY = eater.y;
       const nx = eater.x + result.dx;
       const ny = eater.y - result.dy;   // student uses y-up; grid uses y-down
       if (nx >= 0 && nx < gridSize && ny >= 0 && ny < gridSize) {
@@ -189,6 +189,8 @@ class SimulationEngine {
       anteaters: this.anteaters.map(a => ({
         x:     a.x,
         y:     a.y,
+        prevX: a.prevX,
+        prevY: a.prevY,
         name:  a.player.name,
         color: a.player.color,
         id:    a.player.id,

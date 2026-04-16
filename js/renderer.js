@@ -33,7 +33,7 @@ class Renderer {
   // draw — full redraw every frame
   // -----------------------------------------------------------------------
 
-  draw(state, highlight = null) {
+  draw(state, highlight = null, showTrails = false) {
     const { ctx, canvas, gridSize } = this;
     // Use CSS logical dimensions (set by _scaleForDPR).
     // canvas.width/height are physical pixels and must NOT be used here
@@ -91,20 +91,22 @@ class Renderer {
 
     // Movement trails — from current cell centre to the cell boundary in the
     // direction of the previous cell (half a cell in that direction).
-    ctx.strokeStyle = _ANT_FILL;
-    ctx.lineWidth   = Math.max(0.5, antR * 0.5);
-    ctx.globalAlpha = 0.45;
-    ctx.beginPath();
-    for (const ant of state.ants) {
-      if (ant.prevX !== ant.x || ant.prevY !== ant.y) {
-        const ddx = ant.prevX - ant.x;   // direction toward prev: -1, 0, or 1
-        const ddy = ant.prevY - ant.y;
-        ctx.moveTo(cx(ant.x),                   cy(ant.y));
-        ctx.lineTo(cx(ant.x) + ddx * cell / 2,  cy(ant.y) + ddy * cell / 2);
+    if (showTrails) {
+      ctx.strokeStyle = _ANT_FILL;
+      ctx.lineWidth   = Math.max(0.5, antR * 0.5);
+      ctx.globalAlpha = 0.45;
+      ctx.beginPath();
+      for (const ant of state.ants) {
+        if (ant.prevX !== ant.x || ant.prevY !== ant.y) {
+          const ddx = ant.prevX - ant.x;
+          const ddy = ant.prevY - ant.y;
+          ctx.moveTo(cx(ant.x),                  cy(ant.y));
+          ctx.lineTo(cx(ant.x) + ddx * cell / 2, cy(ant.y) + ddy * cell / 2);
+        }
       }
+      ctx.stroke();
+      ctx.globalAlpha = 1;
     }
-    ctx.stroke();
-    ctx.globalAlpha = 1;
 
     // Ant dots.
     ctx.save();
@@ -160,6 +162,24 @@ class Renderer {
       ctx.fillStyle = hlg;
       ctx.fill();
 
+    }
+
+    // Player trails — drawn over anteater circles.
+    if (showTrails) {
+      ctx.strokeStyle = _ANT_FILL;
+      ctx.lineWidth   = Math.max(0.5, eaterR * 0.3);
+      ctx.globalAlpha = 0.45;
+      ctx.beginPath();
+      for (const eater of state.anteaters) {
+        if (eater.prevX !== eater.x || eater.prevY !== eater.y) {
+          const ddx = eater.prevX - eater.x;
+          const ddy = eater.prevY - eater.y;
+          ctx.moveTo(cx(eater.x),                  cy(eater.y));
+          ctx.lineTo(cx(eater.x) + ddx * cell / 2, cy(eater.y) + ddy * cell / 2);
+        }
+      }
+      ctx.stroke();
+      ctx.globalAlpha = 1;
     }
 
     // ── 6. Hover vector overlay (drawn over anteaters) ────────────────────

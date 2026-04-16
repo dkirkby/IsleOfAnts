@@ -46,12 +46,13 @@ const maxTurnsInput   = document.getElementById('max-turns');
 const antDensityInput = document.getElementById('ant-density');
 const speedSlider     = document.getElementById('speed-slider');
 const speedLabel      = document.getElementById('speed-label');
+const showTrailsEl    = document.getElementById('show-trails');
 
 gridSizeInput.addEventListener('input', () => {
   const n = Math.max(5, Math.min(50, parseInt(gridSizeInput.value, 10) || 20));
   gridSizeEcho.textContent = n;
   _renderer.gridSize = n;
-  _renderer.draw(_engine ? _engine.getState() : null, _hoverHighlight);
+  _renderer.draw(_engine ? _engine.getState() : null, _hoverHighlight, showTrailsEl.checked);
   _configDirty = true;
   _syncButtons();
 });
@@ -69,6 +70,10 @@ antDensityInput.addEventListener('input', () => {
 speedSlider.addEventListener('input', () => {
   speedLabel.textContent = speedSlider.value;
   if (_running) { clearTimeout(_timer); _scheduleNext(); }
+});
+
+showTrailsEl.addEventListener('change', () => {
+  if (_engine) _renderer.draw(_engine.getState(), _hoverHighlight, showTrailsEl.checked);
 });
 
 // ========================================================================
@@ -107,14 +112,14 @@ function _onParamEnter(span, card, param) {
 
   if (param !== 'current_turn') {
     _hoverHighlight = { eaterId, param };
-    _renderer.draw(state, _hoverHighlight);
+    _renderer.draw(state, _hoverHighlight, showTrailsEl.checked);
   }
 }
 
 function _onParamLeave() {
   _tooltip.classList.add('hidden');
   _hoverHighlight = null;
-  if (_engine) _renderer.draw(_engine.getState(), null);
+  if (_engine) _renderer.draw(_engine.getState(), null, showTrailsEl.checked);
 }
 
 function _positionTooltip(el) {
@@ -283,7 +288,7 @@ async function _initEngine() {
   _hoverHighlight = null;
   const state = _engine.getState();
   _updateScores(state);
-  _renderer.draw(state, null);
+  _renderer.draw(state, null, showTrailsEl.checked);
   _syncInputs();
   _syncEditors();
   _syncButtons();
@@ -298,7 +303,7 @@ async function _doStep() {
   await _engine.step();
 
   const state = _engine.getState();
-  _renderer.draw(state, _hoverHighlight);
+  _renderer.draw(state, _hoverHighlight, showTrailsEl.checked);
   _updateScores(state);
   _busy = false;
 
