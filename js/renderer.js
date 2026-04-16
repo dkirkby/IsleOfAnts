@@ -167,6 +167,37 @@ class Renderer {
         ctx.fillText(eater.name, lx, ly);
       }
     }
+
+    // ── 7. HUD — ant count (bottom-left) and turn progress (bottom-right) ──
+    this._drawHUD(ctx, state, W, PAD, GRID);
+  }
+
+  _drawHUD(ctx, state, W, PAD, GRID) {
+    const antCount  = state.ants.length;
+    const turn      = state.turn;
+    const maxTurns  = state.maxTurns ?? '?';
+
+    // Vertical centre of the bottom water border.
+    const y = PAD + GRID + PAD / 2;
+
+    ctx.font         = `500 11px "DM Sans", sans-serif`;
+    ctx.textBaseline = 'middle';
+
+    // Ant count — bottom-left
+    const antText = `${antCount} ant${antCount !== 1 ? 's' : ''}`;
+    ctx.textAlign = 'left';
+    ctx.fillStyle = 'rgba(0,0,0,0.55)';
+    ctx.fillText(antText, PAD + 1, y + 1);
+    ctx.fillStyle = '#d4a020';
+    ctx.fillText(antText, PAD, y);
+
+    // Turn progress — bottom-right
+    const turnText = `${turn} / ${maxTurns}`;
+    ctx.textAlign = 'right';
+    ctx.fillStyle = 'rgba(0,0,0,0.55)';
+    ctx.fillText(turnText, PAD + GRID + 1, y + 1);
+    ctx.fillStyle = '#7a9080';
+    ctx.fillText(turnText, PAD + GRID, y);
   }
 
   // -----------------------------------------------------------------------

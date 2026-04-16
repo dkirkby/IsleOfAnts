@@ -186,10 +186,11 @@ class SimulationEngine {
         nearestAnteater: a.lastNearestAnteater,
         nearestShore:    a.lastNearestShore,
       })),
-      scores: Object.fromEntries(this.anteaters.map(a => [a.player.id, a.score])),
-      turn:   this.turn,
-      done:   this.done,
-      winner: this.winner,  // null | { type:'win', name } | { type:'draw', names:[] }
+      scores:   Object.fromEntries(this.anteaters.map(a => [a.player.id, a.score])),
+      turn:     this.turn,
+      maxTurns: this.maxTurns,
+      done:     this.done,
+      winner:   this.winner,  // null | { type:'win', name } | { type:'draw', names:[] }
     };
   }
 
