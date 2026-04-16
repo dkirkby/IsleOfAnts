@@ -154,7 +154,7 @@ class SimulationEngine {
 
       // Apply move, cancelling it if it would leave the grid.
       const nx = eater.x + result.dx;
-      const ny = eater.y + result.dy;
+      const ny = eater.y - result.dy;   // student uses y-up; grid uses y-down
       if (nx >= 0 && nx < gridSize && ny >= 0 && ny < gridSize) {
         eater.x = nx;
         eater.y = ny;
@@ -242,7 +242,7 @@ class SimulationEngine {
       }
     }
 
-    return { dx: best.x - origin.x, dy: best.y - origin.y };
+    return { dx: best.x - origin.x, dy: -(best.y - origin.y) };
   }
 
   /**
@@ -285,7 +285,7 @@ class SimulationEngine {
       }
     }
 
-    return { dx: best.dx, dy: best.dy };
+    return { dx: best.dx, dy: -best.dy };
   }
 
   // -----------------------------------------------------------------------

@@ -122,22 +122,7 @@ class Renderer {
     ctx.fill();
     ctx.restore();
 
-    // ── 5. Hover vector overlay ───────────────────────────────────────────
-    if (highlight) {
-      const eater = state.anteaters.find(a => a.id === highlight.eaterId);
-      if (eater) {
-        const ex = cx(eater.x), ey = cy(eater.y);
-        const vecMap = {
-          nearest_ant:      eater.nearestAnt,
-          nearest_anteater: eater.nearestAnteater,
-          nearest_shore:    eater.nearestShore,
-        };
-        const vec = vecMap[highlight.param];
-        if (vec) this._drawVector(ex, ey, vec, cell);
-      }
-    }
-
-    // ── 6. Anteaters ─────────────────────────────────────────────────────
+    // ── 5. Anteaters ─────────────────────────────────────────────────────
     const eaterR = Math.max(4, cell * 0.38);
 
     for (const eater of state.anteaters) {
@@ -175,6 +160,21 @@ class Renderer {
       ctx.fillStyle = hlg;
       ctx.fill();
 
+    }
+
+    // ── 6. Hover vector overlay (drawn over anteaters) ────────────────────
+    if (highlight) {
+      const eater = state.anteaters.find(a => a.id === highlight.eaterId);
+      if (eater) {
+        const ex = cx(eater.x), ey = cy(eater.y);
+        const vecMap = {
+          nearest_ant:      eater.nearestAnt,
+          nearest_anteater: eater.nearestAnteater,
+          nearest_shore:    eater.nearestShore,
+        };
+        const vec = vecMap[highlight.param];
+        if (vec) this._drawVector(ex, ey, vec, cell);
+      }
     }
 
     // ── 7. HUD — ant count (bottom-left) and turn progress (bottom-right) ──
@@ -216,7 +216,7 @@ class Renderer {
   _drawVector(ox, oy, vec, cell) {
     const { ctx } = this;
     const tx = ox + vec.dx * cell;
-    const ty = oy + vec.dy * cell;
+    const ty = oy - vec.dy * cell;   // vec uses y-up; canvas uses y-down
 
     // Direction and perpendicular unit vectors.
     const ldx = tx - ox, ldy = ty - oy;
@@ -231,15 +231,13 @@ class Renderer {
     // Base of arrowhead (line ends here so it doesn't poke through).
     const bx = tx - ux * ah, by = ty - uy * ah;
 
-    // Dashed shaft.
+    // Solid shaft.
     ctx.beginPath();
     ctx.moveTo(ox, oy);
     ctx.lineTo(bx, by);
     ctx.strokeStyle = _VEC_COLOR;
     ctx.lineWidth   = 1.5;
-    ctx.setLineDash([4, 4]);
     ctx.stroke();
-    ctx.setLineDash([]);
 
     // Filled arrowhead triangle.
     ctx.beginPath();
