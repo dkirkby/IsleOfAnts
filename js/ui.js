@@ -48,6 +48,7 @@ function addPlayer(name) {
   const card = document.createElement('div');
   card.className = 'player-card';
   card.dataset.playerId = id;
+  card.style.setProperty('--player-color', color);
 
   card.innerHTML = `
     <div class="player-card-header">

@@ -1,28 +1,44 @@
 /* ============================================================
-   Isle of Ants — stylesheet
+   Isle of Ants — Tropical Terminal theme
    ============================================================ */
 
 /* ----- Reset & base ----- */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg:          #1a1d23;
-  --surface:     #23272f;
-  --surface2:    #2c313c;
-  --border:      #3a3f4b;
-  --text:        #e0e4ed;
-  --text-muted:  #7a8194;
-  --accent:      #4e9af1;
-  --accent-dark: #2d6fc4;
-  --danger:      #e05c5c;
-  --danger-dark: #b03030;
-  --success:     #4ecf7a;
-  --warning:     #f0a830;
-  --font-mono:   "Fira Code", "Cascadia Code", "Consolas", monospace;
-  --font-ui:     system-ui, -apple-system, sans-serif;
-  --radius:      6px;
-  --gap:         16px;
-  --scoreboard-w: 200px;
+  /* Jungle-green dark palette */
+  --bg:           #090e0b;
+  --surface:      #0f1a12;
+  --surface2:     #162019;
+  --surface3:     #1e2e22;
+  --border:       #253828;
+  --border-hi:    #3a5a42;
+
+  /* Warm cream text */
+  --text:         #ddd5bc;
+  --text-muted:   #637a6a;
+  --text-dim:     #3d5242;
+
+  /* Amber gold accent */
+  --accent:       #c8961e;
+  --accent-hi:    #e0ac30;
+  --accent-dim:   #7a5a10;
+
+  /* Status colors */
+  --danger:       #b8503a;
+  --danger-hi:    #d06248;
+  --success:      #4eb86a;
+  --warning:      #c8961e;
+
+  /* Fonts */
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-ui:      'DM Sans', system-ui, sans-serif;
+  --font-mono:    'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+
+  --radius:   5px;
+  --radius-lg: 8px;
+  --gap:      16px;
+  --scoreboard-w: 190px;
 }
 
 html, body {
@@ -30,59 +46,91 @@ html, body {
   color: var(--text);
   font-family: var(--font-ui);
   font-size: 14px;
-  line-height: 1.5;
+  line-height: 1.55;
 }
 
-/* ----- Header -------------------------------------------------------- */
+/* Subtle radial atmosphere */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 60% 40% at 70% 10%, rgba(200,150,30,0.04) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 60% at 10% 80%, rgba(40,100,50,0.07) 0%, transparent 50%);
+  z-index: 0;
+}
+
+body > * { position: relative; z-index: 1; }
+
+/* ================================================================
+   HEADER
+   ================================================================ */
 header {
   display: flex;
   align-items: center;
-  gap: 20px;
-  padding: 10px 20px;
+  gap: 18px;
+  padding: 11px 22px;
   background: var(--surface);
   border-bottom: 1px solid var(--border);
   flex-wrap: wrap;
 }
 
 header h1 {
-  font-size: 1.3rem;
+  font-family: var(--font-display);
+  font-size: 1.45rem;
   font-weight: 700;
-  color: var(--accent);
+  letter-spacing: 0.2px;
+  line-height: 1;
   white-space: nowrap;
+}
+
+.title-of {
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.title-ants {
+  color: var(--accent);
 }
 
 .subtitle {
-  color: var(--text-muted);
-  font-size: 0.82rem;
+  color: var(--text-dim);
+  font-size: 0.8rem;
+  letter-spacing: 0.3px;
   white-space: nowrap;
 }
 
-/* grid settings live in the header */
+/* Grid settings in header */
 .header-settings {
   display: flex;
   align-items: center;
-  gap: 16px;
-  margin-left: auto; /* push to right */
+  gap: 20px;
+  margin-left: auto;
 }
 
 .header-field {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 0.85rem;
+  gap: 7px;
+  font-size: 0.78rem;
   color: var(--text-muted);
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
   cursor: default;
 }
 
 .header-field input[type="number"] {
-  width: 58px;
+  width: 54px;
   padding: 4px 6px;
   background: var(--surface2);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   color: var(--text);
-  font-size: 0.85rem;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
   text-align: center;
+  transition: border-color 0.15s;
 }
 
 .header-field input[type="number"]:focus {
@@ -91,10 +139,14 @@ header h1 {
 }
 
 .unit {
-  color: var(--text-muted);
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
 }
 
-/* ----- Arena row: scoreboard | canvas+controls ----------------------- */
+/* ================================================================
+   ARENA ROW  (scoreboard | canvas + controls)
+   ================================================================ */
 #arena-row {
   display: grid;
   grid-template-columns: var(--scoreboard-w) 1fr;
@@ -103,21 +155,23 @@ header h1 {
   align-items: start;
 }
 
-/* ----- Scoreboard (left of canvas) ----------------------------------- */
+/* ================================================================
+   SCOREBOARD
+   ================================================================ */
 #scoreboard {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 14px;
+  border-radius: var(--radius-lg);
+  padding: 14px 12px;
 }
 
 #scoreboard h2 {
-  font-size: 0.72rem;
+  font-size: 0.65rem;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.8px;
-  color: var(--text-muted);
-  margin-bottom: 10px;
+  letter-spacing: 1.2px;
+  color: var(--text-dim);
+  margin-bottom: 12px;
 }
 
 #score-table {
@@ -128,34 +182,49 @@ header h1 {
 
 #score-table th {
   text-align: left;
-  padding: 3px 6px;
-  color: var(--text-muted);
-  font-weight: 500;
+  padding: 0 6px 6px;
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text-dim);
   border-bottom: 1px solid var(--border);
 }
 
 #score-table td {
-  padding: 5px 6px;
+  padding: 7px 6px;
   border-bottom: 1px solid var(--surface2);
+  vertical-align: middle;
+}
+
+#score-table td.score-value {
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--accent);
+  text-align: right;
 }
 
 .score-swatch {
   display: inline-block;
-  width: 9px;
-  height: 9px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
-  margin-right: 5px;
+  margin-right: 6px;
   vertical-align: middle;
+  flex-shrink: 0;
 }
 
 #result-message {
-  margin-top: 12px;
-  padding: 8px 10px;
+  margin-top: 14px;
+  padding: 9px 10px;
   border-radius: var(--radius);
+  font-size: 0.78rem;
   font-weight: 600;
-  font-size: 0.85rem;
+  letter-spacing: 0.2px;
   background: var(--surface2);
   border: 1px solid var(--border);
+  line-height: 1.4;
 }
 
 #result-message.win  { border-color: var(--success); color: var(--success); }
@@ -163,7 +232,9 @@ header h1 {
 
 .hidden { display: none !important; }
 
-/* ----- Simulation panel (right: canvas + controls) ------------------- */
+/* ================================================================
+   SIMULATION PANEL  (canvas + controls bar)
+   ================================================================ */
 #simulation-panel {
   display: flex;
   flex-direction: column;
@@ -173,42 +244,54 @@ header h1 {
 #canvas-wrap {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
-  /* Square: let the canvas set the height via its own square dimensions */
+  border-radius: var(--radius-lg);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 10px;
+  /* Subtle inset glow — suggests a screen */
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);
 }
 
 #game-canvas {
   display: block;
-  /* Canvas element is always square (width==height set in HTML/JS).
-     CSS constrains its rendered size to fill the available column width. */
   width: 100%;
   height: auto;
   aspect-ratio: 1 / 1;
   border-radius: 3px;
+  background: var(--bg);
 }
 
-/* ----- Controls bar -------------------------------------------------- */
+/* ================================================================
+   CONTROLS BAR
+   ================================================================ */
 #controls-bar {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 10px 14px;
+  border-radius: var(--radius-lg);
+  padding: 9px 14px;
+}
+
+/* Visual separator between button group and controls */
+#controls-bar .separator {
+  width: 1px;
+  height: 22px;
+  background: var(--border);
+  margin: 0 4px;
 }
 
 .control-group {
   display: flex;
   align-items: center;
   gap: 6px;
+  font-size: 0.78rem;
   color: var(--text-muted);
-  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .checkbox-group {
@@ -216,42 +299,79 @@ header h1 {
   user-select: none;
 }
 
-.checkbox-group input { cursor: pointer; }
-
-#speed-slider {
-  width: 90px;
+.checkbox-group input {
+  cursor: pointer;
   accent-color: var(--accent);
 }
 
+#speed-slider {
+  width: 80px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
 #speed-label {
-  width: 1.2em;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  width: 1.4em;
   text-align: center;
   color: var(--text);
 }
 
-/* ----- Buttons ------------------------------------------------------- */
+/* ================================================================
+   BUTTONS
+   ================================================================ */
 .btn {
-  padding: 7px 14px;
+  padding: 6px 14px;
   border: none;
   border-radius: var(--radius);
-  font-size: 0.85rem;
+  font-family: var(--font-ui);
+  font-size: 0.82rem;
   font-weight: 600;
+  letter-spacing: 0.2px;
   cursor: pointer;
-  transition: background 0.15s, opacity 0.15s;
+  transition: background 0.12s, transform 0.08s, box-shadow 0.12s;
+  line-height: 1.5;
 }
 
-.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn:active:not(:disabled) { transform: translateY(1px); }
+.btn:disabled { opacity: 0.35; cursor: not-allowed; }
 
-.btn-primary   { background: var(--accent);  color: #fff; }
-.btn-primary:hover:not(:disabled)   { background: var(--accent-dark); }
+/* Amber primary — dark text for contrast */
+.btn-primary {
+  background: var(--accent);
+  color: #0a0e0b;
+}
+.btn-primary:hover:not(:disabled) {
+  background: var(--accent-hi);
+  box-shadow: 0 0 0 2px rgba(200,150,30,0.25);
+}
 
-.btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
-.btn-secondary:hover:not(:disabled) { background: var(--border); }
+/* Ghost secondary */
+.btn-secondary {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border-hi);
+}
+.btn-secondary:hover:not(:disabled) {
+  background: var(--surface2);
+  color: var(--text);
+  border-color: var(--accent-dim);
+}
 
-.btn-danger    { background: var(--danger);  color: #fff; }
-.btn-danger:hover:not(:disabled)    { background: var(--danger-dark); }
+/* Danger */
+.btn-danger {
+  background: transparent;
+  color: var(--danger);
+  border: 1px solid var(--danger);
+}
+.btn-danger:hover:not(:disabled) {
+  background: rgba(184,80,58,0.15);
+}
 
-/* ----- Players section (full-width, below arena row) ----------------- */
+/* ================================================================
+   PLAYERS SECTION
+   ================================================================ */
 #players-section {
   padding: 0 var(--gap) var(--gap);
 }
@@ -260,131 +380,180 @@ header h1 {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 }
 
 #players-header h2 {
-  font-size: 0.72rem;
+  font-size: 0.65rem;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.8px;
-  color: var(--text-muted);
+  letter-spacing: 1.2px;
+  color: var(--text-dim);
 }
 
 #player-list {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
 }
 
-/* ----- Player card --------------------------------------------------- */
+/* ================================================================
+   PLAYER CARD
+   ================================================================ */
 .player-card {
   background: var(--surface);
+  /* Left stripe via border-left; the color is set inline via --player-color */
   border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 14px;
+  border-left: 3px solid var(--player-color, var(--border-hi));
+  border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+  padding: 14px 16px;
+  /* Entrance animation */
+  animation: cardIn 0.2s ease-out both;
+}
+
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 .player-card-header {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 10px;
+  gap: 10px;
+  margin-bottom: 12px;
 }
 
 .player-color-swatch {
-  width: 13px;
-  height: 13px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   flex-shrink: 0;
 }
 
 .player-card-header input[type="text"] {
   flex: 1;
-  max-width: 260px;
-  padding: 4px 8px;
+  max-width: 280px;
+  padding: 5px 9px;
   background: var(--surface2);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   color: var(--text);
-  font-size: 0.9rem;
+  font-family: var(--font-ui);
+  font-size: 0.88rem;
+  transition: border-color 0.15s;
 }
 
 .player-card-header input[type="text"]:focus {
   outline: none;
-  border-color: var(--accent);
+  border-color: var(--accent-dim);
 }
 
 .btn-remove {
   background: none;
   border: none;
-  color: var(--text-muted);
+  color: var(--text-dim);
   cursor: pointer;
-  font-size: 1.1rem;
-  padding: 2px 6px;
+  font-size: 1rem;
+  padding: 3px 7px;
   border-radius: var(--radius);
   line-height: 1;
   margin-left: auto;
+  transition: color 0.12s, background 0.12s;
 }
 
-.btn-remove:hover { color: var(--danger); background: rgba(224,92,92,0.12); }
+.btn-remove:hover {
+  color: var(--danger);
+  background: rgba(184,80,58,0.12);
+}
 
-/* Function signature — read-only display above CodeMirror */
+/* ================================================================
+   FUNCTION SIGNATURE + CODEMIRROR
+   ================================================================ */
 .fn-signature {
   font-family: var(--font-mono);
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   color: var(--text-muted);
   background: var(--bg);
-  padding: 6px 10px;
+  padding: 7px 12px;
   border-radius: var(--radius) var(--radius) 0 0;
   border: 1px solid var(--border);
   border-bottom: none;
   overflow-x: auto;
   white-space: nowrap;
+  /* Subtle top highlight — suggests a tab */
+  border-top: 2px solid var(--border-hi);
 }
 
 .fn-signature .kw    { color: #c792ea; }
 .fn-signature .fn    { color: #82aaff; }
-.fn-signature .param { color: #f78c6c; }
+.fn-signature .param { color: #ffcb8b; }
 
-/* CodeMirror — attaches flush below the signature */
+/* CodeMirror — override to match jungle theme */
 .CodeMirror {
   border: 1px solid var(--border);
   border-radius: 0 0 var(--radius) var(--radius);
   font-family: var(--font-mono);
-  font-size: 0.85rem;
+  font-size: 0.84rem;
   height: auto;
-  min-height: 90px;
-  background: #282a36; /* dracula bg */
+  min-height: 88px;
+  /* Override Dracula background to match our theme */
+  background: #0b1510 !important;
+}
+
+.CodeMirror-gutters {
+  background: #0f1c14 !important;
+  border-right: 1px solid var(--border) !important;
+}
+
+.CodeMirror-linenumber {
+  color: var(--text-dim) !important;
 }
 
 .CodeMirror-scroll {
-  min-height: 90px;
+  min-height: 88px;
   max-height: 300px;
 }
 
-/* ----- Debug output (inside each player card) ------------------------ */
+.CodeMirror-cursor {
+  border-left-color: var(--accent) !important;
+}
+
+.CodeMirror-selected {
+  background: rgba(200,150,30,0.15) !important;
+}
+
+/* ================================================================
+   DEBUG OUTPUT — vintage terminal aesthetic
+   ================================================================ */
 .debug-label {
-  font-size: 0.72rem;
+  font-size: 0.62rem;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.7px;
-  color: var(--text-muted);
-  margin-top: 10px;
+  letter-spacing: 1px;
+  color: var(--text-dim);
+  margin-top: 12px;
   margin-bottom: 4px;
 }
 
 .debug-output {
   width: 100%;
-  height: 90px;
-  background: var(--bg);
-  border: 1px solid var(--border);
+  height: 88px;
+  background: #050b07;
+  border: 1px solid #1a2e1e;
   border-radius: var(--radius);
-  color: var(--text);
+  color: #4db86a;
   font-family: var(--font-mono);
-  font-size: 0.78rem;
-  padding: 8px;
+  font-size: 0.76rem;
+  padding: 8px 10px;
   resize: vertical;
   overflow-y: auto;
   white-space: pre-wrap;
+  /* Subtle scanline texture */
+  background-image: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.06) 2px,
+    rgba(0,0,0,0.06) 4px
+  );
 }

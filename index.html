@@ -15,13 +15,18 @@
   <script src="https://skulpt.org/js/skulpt.min.js"></script>
   <script src="https://skulpt.org/js/skulpt-stdlib.js"></script>
 
+  <!-- Distinctive typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
 <!-- ===== HEADER: title + grid settings ===== -->
 <header>
-  <h1>Isle of Ants</h1>
+  <h1><span class="title-of">Isle of</span> <span class="title-ants">Ants</span></h1>
   <p class="subtitle">Program an anteater. Eat ants. Win.</p>
 
   <div class="header-settings">
@@ -68,6 +73,8 @@
       <button id="btn-start"    class="btn btn-primary">Start</button>
       <button id="btn-step"     class="btn btn-secondary">Step</button>
       <button id="btn-reset"    class="btn btn-danger">Stop / Reset</button>
+
+      <div class="separator"></div>
 
       <div class="control-group">
         <label for="speed-slider">Speed</label>
