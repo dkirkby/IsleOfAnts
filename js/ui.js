@@ -1,4 +1,14 @@
-/* js/ui.js — Milestone 1: DOM wiring for setup panel shell */
+/* js/ui.js — DOM wiring (Milestones 1–2 shell, extended in Milestone 7) */
+
+// ---- Renderer bootstrap ------------------------------------------------
+// Draw the empty island as soon as the page paints so the canvas isn't blank.
+const _canvas   = document.getElementById('game-canvas');
+const _renderer = new Renderer(_canvas, parseInt(document.getElementById('grid-size').value, 10));
+// Use requestAnimationFrame to let the canvas lay out at its CSS size first.
+requestAnimationFrame(() => {
+  _renderer._scaleForDPR();
+  _renderer.draw(null, false);
+});
 
 // Distinct player colors (used for swatches, anteater rendering, scoreboard)
 const PLAYER_COLORS = [
@@ -23,7 +33,10 @@ const gridSizeInput = document.getElementById('grid-size');
 const gridSizeEcho  = document.getElementById('grid-size-echo');
 
 gridSizeInput.addEventListener('input', () => {
-  gridSizeEcho.textContent = gridSizeInput.value;
+  const n = Math.max(5, Math.min(50, parseInt(gridSizeInput.value, 10) || 20));
+  gridSizeEcho.textContent = n;
+  _renderer.gridSize = n;
+  _renderer.draw(null, false);
 });
 
 // ---- Speed slider label sync -----------------------------------------
