@@ -52,7 +52,8 @@ gridSizeInput.addEventListener('input', () => {
   const n = Math.max(5, Math.min(50, parseInt(gridSizeInput.value, 10) || 20));
   gridSizeEcho.textContent = n;
   _renderer.gridSize = n;
-  _renderer.draw(_engine ? _engine.getState() : null, _hoverHighlight, showTrailsEl.checked);
+  const _gridState = (_engine && _engine.gridSize === n) ? _engine.getState() : null;
+  _renderer.draw(_gridState, _hoverHighlight, showTrailsEl.checked);
   _configDirty = true;
   _syncButtons();
 });

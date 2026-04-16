@@ -61,9 +61,26 @@ class Renderer {
     ctx.fillStyle = wg;
     ctx.fillRect(0, 0, W, H);
 
-    // ── 2. Island ────────────────────────────────────────────────────────
+    // ── 2. Island (land cells only; full square when no mask yet) ────────
+    const mask = state?.islandMask ?? null;
+
+    // Helper: fill all land cells using a batched path, or the full rect when
+    // no mask is available (pre-init preview).
+    const fillLand = () => {
+      if (mask) {
+        ctx.beginPath();
+        for (let gy = 0; gy < gridSize; gy++)
+          for (let gx = 0; gx < gridSize; gx++)
+            if (!mask[gy][gx])
+              ctx.rect(PAD + gx * cell, PAD + gy * cell, cell, cell);
+        ctx.fill();
+      } else {
+        ctx.fillRect(PAD, PAD, GRID, GRID);
+      }
+    };
+
     ctx.fillStyle = _ISLAND_FILL;
-    ctx.fillRect(PAD, PAD, GRID, GRID);
+    fillLand();
 
     // Radial centre-brightening — makes the island feel lit from above.
     const ig = ctx.createRadialGradient(
@@ -73,15 +90,24 @@ class Renderer {
     ig.addColorStop(0, 'rgba(255,235,160,0.30)');
     ig.addColorStop(1, 'rgba(120,80,10,0.18)');
     ctx.fillStyle = ig;
-    ctx.fillRect(PAD, PAD, GRID, GRID);
+    fillLand();
 
-    // ── 3. Grid lines ────────────────────────────────────────────────────
+    // ── 3. Grid lines (land cells only) ──────────────────────────────────
     ctx.strokeStyle = 'rgba(0,0,0,0.10)';
     ctx.lineWidth   = 0.5;
-    for (let i = 0; i <= gridSize; i++) {
-      const p = PAD + i * cell;
-      ctx.beginPath(); ctx.moveTo(p, PAD);        ctx.lineTo(p, PAD + GRID); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(PAD, p);        ctx.lineTo(PAD + GRID, p); ctx.stroke();
+    if (mask) {
+      ctx.beginPath();
+      for (let gy = 0; gy < gridSize; gy++)
+        for (let gx = 0; gx < gridSize; gx++)
+          if (!mask[gy][gx])
+            ctx.rect(PAD + gx * cell, PAD + gy * cell, cell, cell);
+      ctx.stroke();
+    } else {
+      for (let i = 0; i <= gridSize; i++) {
+        const p = PAD + i * cell;
+        ctx.beginPath(); ctx.moveTo(p, PAD);     ctx.lineTo(p, PAD + GRID); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(PAD, p);     ctx.lineTo(PAD + GRID, p); ctx.stroke();
+      }
     }
 
     if (!state) return;   // empty island drawn — nothing else to paint
