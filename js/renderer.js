@@ -36,8 +36,11 @@ class Renderer {
 
   draw(state, showVectors = false) {
     const { ctx, canvas, gridSize } = this;
-    const W = canvas.width;
-    const H = canvas.height;
+    // Use CSS logical dimensions (set by _scaleForDPR).
+    // canvas.width/height are physical pixels and must NOT be used here
+    // because ctx.scale(dpr,dpr) has already been applied.
+    const W = this._drawW || canvas.width;
+    const H = this._drawH || canvas.height;
 
     // Layout: a fixed-pixel water border around the island.
     const PAD  = Math.round(Math.min(W, H) * 0.05);
@@ -221,10 +224,14 @@ class Renderer {
     const dpr    = window.devicePixelRatio || 1;
     const canvas = this.canvas;
     const css    = canvas.getBoundingClientRect();
-    // Only rescale if the canvas has been laid out (non-zero size).
     if (css.width === 0) return;
+    // Setting canvas.width resets the transform, so do it before ctx.scale.
     canvas.width  = Math.round(css.width  * dpr);
     canvas.height = Math.round(css.height * dpr);
     this.ctx.scale(dpr, dpr);
+    // Store CSS logical dimensions: after ctx.scale, draw() must use these
+    // (not canvas.width/height which are physical pixels).
+    this._drawW = css.width;
+    this._drawH = css.height;
   }
 }
