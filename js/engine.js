@@ -84,6 +84,10 @@ class SimulationEngine {
     this.turn   = 0;
     this.done   = false;
     this.winner = null;
+
+    // Pre-compute nearest vectors so hover tooltips reflect the initial board
+    // state and match the values that will be passed to move() on turn 1.
+    for (const eater of this.anteaters) this._computeNearest(eater);
   }
 
   // -----------------------------------------------------------------------
@@ -118,35 +122,20 @@ class SimulationEngine {
     }
 
     // ── Phase 2: Anteater movement ───────────────────────────────────────
+    // Snapshot nearest vectors for all anteaters before any moves so every
+    // player sees the same start-of-turn board state.
+    for (const eater of this.anteaters) this._computeNearest(eater);
+
     // Randomise execution order each turn.
     const order = globalRNG.shuffle([...this.anteaters]);
 
     for (const eater of order) {
-      const origin = { x: eater.x, y: eater.y };
-
-      // Vectors to nearest entities — null when none exist.
-      const otherEaters = this.anteaters
-        .filter(a => a !== eater)
-        .map(a => ({ x: a.x, y: a.y }));
-
-      // Exclude ants on the anteater's own cell — they will be eaten this turn.
-      const visibleAnts     = this.ants.filter(a => !(a.x === eater.x && a.y === eater.y));
-      const nearestAnt      = SimulationEngine.nearestOf(origin, visibleAnts);
-      const nearestAnteater = SimulationEngine.nearestOf(origin, otherEaters);
-      const nearestShore    = SimulationEngine.nearestShoreVector(
-        origin, gridSize, (x, y) => this.islandMask[y][x]);
-
-      // Store for Dev Mode.
-      eater.lastNearestAnt      = nearestAnt;
-      eater.lastNearestAnteater = nearestAnteater;
-      eater.lastNearestShore    = nearestShore;
-
       // Run the player's Python move() function.
       const result = await callMove(
         eater.player,
-        nearestAnt,       // null when ants.length === 0
-        nearestAnteater,  // null when playing solo
-        nearestShore,
+        eater.lastNearestAnt,       // null when ants.length === 0
+        eater.lastNearestAnteater,  // null when playing solo
+        eater.lastNearestShore,
         this.turn + 1,    // 1-indexed current turn
       );
 
@@ -291,6 +280,26 @@ class SimulationEngine {
   // -----------------------------------------------------------------------
   // Private helpers
   // -----------------------------------------------------------------------
+
+  /**
+   * Compute and store nearest-entity vectors on eater.lastNearest*.
+   * Called for every anteater as a pre-pass before the move loop in step(),
+   * so all players see a consistent start-of-turn snapshot.
+   * Also called at the end of init() to seed the hover tooltips.
+   */
+  _computeNearest(eater) {
+    const { gridSize } = this;
+    const origin      = { x: eater.x, y: eater.y };
+    const otherEaters = this.anteaters
+      .filter(a => a !== eater)
+      .map(a => ({ x: a.x, y: a.y }));
+    const visibleAnts = this.ants
+      .filter(a => !(a.x === eater.x && a.y === eater.y));
+    eater.lastNearestAnt      = SimulationEngine.nearestOf(origin, visibleAnts);
+    eater.lastNearestAnteater = SimulationEngine.nearestOf(origin, otherEaters);
+    eater.lastNearestShore    = SimulationEngine.nearestShoreVector(
+      origin, gridSize, (x, y) => this.islandMask[y][x]);
+  }
 
   /**
    * Generate an irregular island shape using smooth value noise.

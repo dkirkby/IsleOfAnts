@@ -134,6 +134,8 @@ function _positionTooltip(el) {
 // ========================================================================
 document.getElementById('add-player-btn').addEventListener('click', () => {
   addPlayer(`Player ${playerCount + 1}`);
+  _configDirty = true;
+  _syncButtons();
 });
 
 function addPlayer(name) {
@@ -203,6 +205,8 @@ function _removePlayer(card, id) {
   if (card._cm) card._cm.toTextArea();
   card.remove();
   document.querySelector(`#score-body [data-player-id="${id}"]`)?.remove();
+  _configDirty = true;
+  _syncButtons();
 }
 
 // ========================================================================
@@ -226,6 +230,8 @@ function _syncInputs() {
   gridSizeInput.disabled   = !editable;
   maxTurnsInput.disabled   = !editable;
   antDensityInput.disabled = !editable;
+  document.getElementById('add-player-btn').disabled = !editable;
+  document.querySelectorAll('.btn-remove').forEach(btn => btn.disabled = !editable);
 }
 
 function _syncEditors() {
@@ -400,6 +406,62 @@ btnPause.addEventListener('click', () => {
   clearTimeout(_timer);
   _timer = null;
   _syncButtons();
+});
+
+// ========================================================================
+// Canvas resize (drag handle)
+// ========================================================================
+
+let _canvasUserWidth = null;   // null = fill available width (CSS default)
+
+function _rescaleAndDraw() {
+  _renderer._scaleForDPR();
+  const state = _engine ? _engine.getState() : null;
+  _renderer.draw(state, _hoverHighlight, showTrailsEl.checked);
+}
+
+function _applyCanvasWidth(px) {
+  const maxW = document.getElementById('simulation-panel').getBoundingClientRect().width;
+  const w    = Math.max(120, Math.min(Math.round(px), maxW));
+  _canvasUserWidth = w;
+  const wrap = document.getElementById('canvas-wrap');
+  wrap.style.width     = w + 'px';
+  wrap.style.alignSelf = 'flex-start';
+  _rescaleAndDraw();
+}
+
+window.addEventListener('resize', () => {
+  if (_canvasUserWidth !== null) {
+    _applyCanvasWidth(_canvasUserWidth);  // re-clamp to new max
+  } else {
+    requestAnimationFrame(_rescaleAndDraw);
+  }
+});
+
+const _canvasResizeHandle = document.getElementById('canvas-resize-handle');
+let _resizeDragging = false;
+let _resizeStartX   = 0;
+let _resizeStartW   = 0;
+
+_canvasResizeHandle.addEventListener('mousedown', e => {
+  e.preventDefault();
+  _resizeDragging            = true;
+  _resizeStartX              = e.clientX;
+  _resizeStartW              = document.getElementById('canvas-wrap').getBoundingClientRect().width;
+  document.body.style.cursor     = 'nwse-resize';
+  document.body.style.userSelect = 'none';
+});
+
+window.addEventListener('mousemove', e => {
+  if (!_resizeDragging) return;
+  _applyCanvasWidth(_resizeStartW + (e.clientX - _resizeStartX));
+});
+
+window.addEventListener('mouseup', () => {
+  if (!_resizeDragging) return;
+  _resizeDragging                = false;
+  document.body.style.cursor     = '';
+  document.body.style.userSelect = '';
 });
 
 // Initial state
