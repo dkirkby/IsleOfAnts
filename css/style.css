@@ -1,0 +1,390 @@
+/* ============================================================
+   Isle of Ants — stylesheet
+   ============================================================ */
+
+/* ----- Reset & base ----- */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:          #1a1d23;
+  --surface:     #23272f;
+  --surface2:    #2c313c;
+  --border:      #3a3f4b;
+  --text:        #e0e4ed;
+  --text-muted:  #7a8194;
+  --accent:      #4e9af1;
+  --accent-dark: #2d6fc4;
+  --danger:      #e05c5c;
+  --danger-dark: #b03030;
+  --success:     #4ecf7a;
+  --warning:     #f0a830;
+  --font-mono:   "Fira Code", "Cascadia Code", "Consolas", monospace;
+  --font-ui:     system-ui, -apple-system, sans-serif;
+  --radius:      6px;
+  --gap:         16px;
+  --scoreboard-w: 200px;
+}
+
+html, body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* ----- Header -------------------------------------------------------- */
+header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 10px 20px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+header h1 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+.subtitle {
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+/* grid settings live in the header */
+.header-settings {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-left: auto; /* push to right */
+}
+
+.header-field {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  cursor: default;
+}
+
+.header-field input[type="number"] {
+  width: 58px;
+  padding: 4px 6px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.header-field input[type="number"]:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.unit {
+  color: var(--text-muted);
+}
+
+/* ----- Arena row: scoreboard | canvas+controls ----------------------- */
+#arena-row {
+  display: grid;
+  grid-template-columns: var(--scoreboard-w) 1fr;
+  gap: var(--gap);
+  padding: var(--gap);
+  align-items: start;
+}
+
+/* ----- Scoreboard (left of canvas) ----------------------------------- */
+#scoreboard {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+}
+
+#scoreboard h2 {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+}
+
+#score-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+#score-table th {
+  text-align: left;
+  padding: 3px 6px;
+  color: var(--text-muted);
+  font-weight: 500;
+  border-bottom: 1px solid var(--border);
+}
+
+#score-table td {
+  padding: 5px 6px;
+  border-bottom: 1px solid var(--surface2);
+}
+
+.score-swatch {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  margin-right: 5px;
+  vertical-align: middle;
+}
+
+#result-message {
+  margin-top: 12px;
+  padding: 8px 10px;
+  border-radius: var(--radius);
+  font-weight: 600;
+  font-size: 0.85rem;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+}
+
+#result-message.win  { border-color: var(--success); color: var(--success); }
+#result-message.draw { border-color: var(--warning); color: var(--warning); }
+
+.hidden { display: none !important; }
+
+/* ----- Simulation panel (right: canvas + controls) ------------------- */
+#simulation-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+}
+
+#canvas-wrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  /* Square: let the canvas set the height via its own square dimensions */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+}
+
+#game-canvas {
+  display: block;
+  /* Canvas element is always square (width==height set in HTML/JS).
+     CSS constrains its rendered size to fill the available column width. */
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1 / 1;
+  border-radius: 3px;
+}
+
+/* ----- Controls bar -------------------------------------------------- */
+#controls-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+}
+
+.control-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.checkbox-group {
+  cursor: pointer;
+  user-select: none;
+}
+
+.checkbox-group input { cursor: pointer; }
+
+#speed-slider {
+  width: 90px;
+  accent-color: var(--accent);
+}
+
+#speed-label {
+  width: 1.2em;
+  text-align: center;
+  color: var(--text);
+}
+
+/* ----- Buttons ------------------------------------------------------- */
+.btn {
+  padding: 7px 14px;
+  border: none;
+  border-radius: var(--radius);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, opacity 0.15s;
+}
+
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.btn-primary   { background: var(--accent);  color: #fff; }
+.btn-primary:hover:not(:disabled)   { background: var(--accent-dark); }
+
+.btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+.btn-secondary:hover:not(:disabled) { background: var(--border); }
+
+.btn-danger    { background: var(--danger);  color: #fff; }
+.btn-danger:hover:not(:disabled)    { background: var(--danger-dark); }
+
+/* ----- Players section (full-width, below arena row) ----------------- */
+#players-section {
+  padding: 0 var(--gap) var(--gap);
+}
+
+#players-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+#players-header h2 {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text-muted);
+}
+
+#player-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ----- Player card --------------------------------------------------- */
+.player-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+}
+
+.player-card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.player-color-swatch {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.player-card-header input[type="text"] {
+  flex: 1;
+  max-width: 260px;
+  padding: 4px 8px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+.player-card-header input[type="text"]:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.btn-remove {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 1.1rem;
+  padding: 2px 6px;
+  border-radius: var(--radius);
+  line-height: 1;
+  margin-left: auto;
+}
+
+.btn-remove:hover { color: var(--danger); background: rgba(224,92,92,0.12); }
+
+/* Function signature — read-only display above CodeMirror */
+.fn-signature {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  background: var(--bg);
+  padding: 6px 10px;
+  border-radius: var(--radius) var(--radius) 0 0;
+  border: 1px solid var(--border);
+  border-bottom: none;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.fn-signature .kw    { color: #c792ea; }
+.fn-signature .fn    { color: #82aaff; }
+.fn-signature .param { color: #f78c6c; }
+
+/* CodeMirror — attaches flush below the signature */
+.CodeMirror {
+  border: 1px solid var(--border);
+  border-radius: 0 0 var(--radius) var(--radius);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  height: auto;
+  min-height: 90px;
+  background: #282a36; /* dracula bg */
+}
+
+.CodeMirror-scroll {
+  min-height: 90px;
+  max-height: 300px;
+}
+
+/* ----- Debug output (inside each player card) ------------------------ */
+.debug-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  color: var(--text-muted);
+  margin-top: 10px;
+  margin-bottom: 4px;
+}
+
+.debug-output {
+  width: 100%;
+  height: 90px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  padding: 8px;
+  resize: vertical;
+  overflow-y: auto;
+  white-space: pre-wrap;
+}

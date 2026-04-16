@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Isle of Ants</title>
+
+  <!-- CodeMirror 5 (pinned) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
+
+  <!-- Skulpt (pinned) -->
+  <script src="https://skulpt.org/js/skulpt.min.js"></script>
+  <script src="https://skulpt.org/js/skulpt-stdlib.js"></script>
+
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ===== HEADER: title + grid settings ===== -->
+<header>
+  <h1>Isle of Ants</h1>
+  <p class="subtitle">Program an anteater. Eat ants. Win.</p>
+
+  <div class="header-settings">
+    <label class="header-field">
+      <span>Grid</span>
+      <input type="number" id="grid-size" min="5" max="50" value="20">
+      <span class="unit">×<span id="grid-size-echo">20</span></span>
+    </label>
+    <label class="header-field">
+      <span>Max Turns</span>
+      <input type="number" id="max-turns" min="10" max="1000" value="100">
+    </label>
+  </div>
+</header>
+
+<!-- ===== MIDDLE ROW: scoreboard | canvas + controls ===== -->
+<div id="arena-row">
+
+  <!-- Left: scoreboard -->
+  <div id="scoreboard">
+    <h2>Scoreboard</h2>
+    <table id="score-table">
+      <thead>
+        <tr>
+          <th>Player</th>
+          <th>Score</th>
+        </tr>
+      </thead>
+      <tbody id="score-body">
+        <!-- rows injected by ui.js -->
+      </tbody>
+    </table>
+    <div id="result-message" class="hidden"></div>
+  </div>
+
+  <!-- Right: canvas + controls -->
+  <div id="simulation-panel">
+    <div id="canvas-wrap">
+      <canvas id="game-canvas" width="500" height="500"></canvas>
+    </div>
+
+    <div id="controls-bar">
+      <button id="btn-validate" class="btn btn-primary">Validate Code</button>
+      <button id="btn-start"    class="btn btn-primary">Start</button>
+      <button id="btn-step"     class="btn btn-secondary">Step</button>
+      <button id="btn-reset"    class="btn btn-danger">Stop / Reset</button>
+
+      <div class="control-group">
+        <label for="speed-slider">Speed</label>
+        <input type="range" id="speed-slider" min="1" max="10" value="5">
+        <span id="speed-label">5</span>
+      </div>
+
+      <label class="control-group checkbox-group">
+        <input type="checkbox" id="show-vectors">
+        <span>Show Vectors</span>
+      </label>
+    </div>
+  </div>
+
+</div>
+
+<!-- ===== PLAYERS: full-width, stacked ===== -->
+<section id="players-section">
+  <div id="players-header">
+    <h2>Players</h2>
+    <button id="add-player-btn" class="btn btn-secondary">+ Add Player</button>
+  </div>
+  <div id="player-list">
+    <!-- player cards injected by ui.js -->
+  </div>
+</section>
+
+<script src="js/rng.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/skulpt-bridge.js"></script>
+<script src="js/renderer.js"></script>
+<script src="js/ui.js"></script>
+
+</body>
+</html>
