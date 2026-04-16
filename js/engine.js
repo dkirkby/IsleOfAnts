@@ -336,16 +336,31 @@ class SimulationEngine {
     const n1 = makeNoise(N * 0.55);
     const n2 = makeNoise(N * 0.28);
 
-    // ── Initial land/water grid ──────────────────────────────────────────
-    const g = Array.from({ length: N }, (_, y) =>
+    // ── Compute combined field for all cells ────────────────────────────
+    const field = Array.from({ length: N }, (_, y) =>
       Array.from({ length: N }, (_, x) => {
         const noise = 0.65 * n1(x, y) + 0.35 * n2(x, y);
-        // Radial falloff: smoothly force edges toward water.
         const rx = (x / (N - 1)) * 2 - 1;
         const ry = (y / (N - 1)) * 2 - 1;
         const r  = Math.min(1, Math.sqrt(rx * rx + ry * ry));
-        return (noise - r * 0.48) < 0.26;  // true = water
+        return noise - r * 0.48;
       })
+    );
+
+    // Pick threshold so that the target land fraction of interior cells
+    // starts as land (border row/col will be forced to water regardless).
+    const targetLandFraction = 0.72;
+    const allValues = [];
+    for (let y = 1; y < N - 1; y++)
+      for (let x = 1; x < N - 1; x++)
+        allValues.push(field[y][x]);
+    allValues.sort((a, b) => a - b);
+    const waterIdx = Math.floor(allValues.length * (1 - targetLandFraction));
+    const threshold = allValues[waterIdx];
+
+    // ── Initial land/water grid ──────────────────────────────────────────
+    const g = Array.from({ length: N }, (_, y) =>
+      Array.from({ length: N }, (_, x) => field[y][x] < threshold)  // true = water
     );
     // Guarantee border is water.
     for (let i = 0; i < N; i++) g[0][i] = g[N-1][i] = g[i][0] = g[i][N-1] = true;
