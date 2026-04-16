@@ -111,18 +111,12 @@ function _extractResult(mod) {
   }
 
   const values = pyResult.v.map((v, i) => {
-    // Accept int; also accept float that is a whole number (e.g. 1.0)
     if (v instanceof Sk.builtin.int_)   return v.v;
-    if (v instanceof Sk.builtin.float_) {
-      if (Number.isInteger(v.v)) return v.v;
-    }
-    throw new Error(`move() tuple[${i}] must be an integer, got ${v.tp$name ?? typeof v}`);
+    if (v instanceof Sk.builtin.float_) return v.v;
+    throw new Error(`move() tuple[${i}] must be a number, got ${v.tp$name ?? typeof v}`);
   });
 
   const [dx, dy] = values;
-  if (![-1, 0, 1].includes(dx) || ![-1, 0, 1].includes(dy)) {
-    throw new Error(`move() values must each be -1, 0, or 1 — got (${dx}, ${dy})`);
-  }
   return { dx, dy };
 }
 

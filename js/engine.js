@@ -144,11 +144,13 @@ class SimulationEngine {
         this._appendDebug(eater.player.id, result.output, result.error);
       }
 
-      // Apply move, cancelling it if it would leave the grid or enter water.
+      // Snap the returned vector to the nearest compass direction, then apply
+      // the move, cancelling it if it would leave the grid or enter water.
+      const { dx, dy } = SimulationEngine._snapDirection(result.dx, result.dy);
       eater.prevX = eater.x;
       eater.prevY = eater.y;
-      const nx = eater.x + result.dx;
-      const ny = eater.y - result.dy;   // student uses y-up; grid uses y-down
+      const nx = eater.x + dx;
+      const ny = eater.y - dy;   // student uses y-up; grid uses y-down
       if (nx >= 0 && nx < gridSize && ny >= 0 && ny < gridSize && !this.islandMask[ny][nx]) {
         eater.x = nx;
         eater.y = ny;
@@ -205,6 +207,27 @@ class SimulationEngine {
   // -----------------------------------------------------------------------
   // Pure static helpers
   // -----------------------------------------------------------------------
+
+  /**
+   * Snap an arbitrary (dx, dy) vector to the nearest of the 8 compass
+   * directions (including diagonals), or return (0,0) if the input is zero
+   * or non-finite.  Used to interpret the student's move() return value.
+   *
+   * @param {number} dx
+   * @param {number} dy
+   * @returns {{dx,dy}}  each component in {-1, 0, 1}
+   */
+  static _snapDirection(dx, dy) {
+    if (!isFinite(dx) || !isFinite(dy) || (dx === 0 && dy === 0)) {
+      return { dx: 0, dy: 0 };
+    }
+    const sector  = Math.round(Math.atan2(dy, dx) / (Math.PI / 4));
+    const snapped = sector * (Math.PI / 4);
+    return {
+      dx: Math.round(Math.cos(snapped)),
+      dy: Math.round(Math.sin(snapped)),
+    };
+  }
 
   /**
    * Return the relative vector {dx, dy} from origin to the nearest target,
