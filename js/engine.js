@@ -94,18 +94,25 @@ class SimulationEngine {
 
     const { gridSize } = this;
 
-    // ── Phase 1: Ant movement ────────────────────────────────────────────
+    // ── Phase 1: Ant movement (first-come-first-served) ─────────────────
+    // Track occupied cells so no two ants share a cell after moving.
+    const _key = (x, y) => x * gridSize + y;
+    const occupied = new Set(this.ants.map(a => _key(a.x, a.y)));
+
     for (const ant of this.ants) {
       ant.prevX = ant.x;
       ant.prevY = ant.y;
       const m  = _MOVES[globalRNG.nextInt(9)];
       const nx = ant.x + m.dx;
       const ny = ant.y + m.dy;
-      // Cancel moves that would leave the island grid.
-      if (nx >= 0 && nx < gridSize && ny >= 0 && ny < gridSize) {
+      // Free this ant's cell before testing the target, so that stay-in-place
+      // (0,0) and moves into a vacated cell are both handled correctly.
+      occupied.delete(_key(ant.x, ant.y));
+      if (nx >= 0 && nx < gridSize && ny >= 0 && ny < gridSize && !occupied.has(_key(nx, ny))) {
         ant.x = nx;
         ant.y = ny;
       }
+      occupied.add(_key(ant.x, ant.y));
     }
 
     // ── Phase 2: Anteater movement ───────────────────────────────────────
