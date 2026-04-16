@@ -180,15 +180,16 @@ function _clearDebug() {
 
 // ── Engine lifecycle ─────────────────────────────────────────────────────
 async function _initEngine() {
-  const players  = getPlayers();
-  const gridSize = Math.max(5, Math.min(50, parseInt(gridSizeInput.value, 10) || 20));
-  const maxTurns = Math.max(10, Math.min(1000, parseInt(document.getElementById('max-turns').value, 10) || 100));
-  const seed     = Date.now() >>> 0;
+  const players    = getPlayers();
+  const gridSize   = Math.max(5,  Math.min(50,   parseInt(gridSizeInput.value, 10) || 20));
+  const maxTurns   = Math.max(10, Math.min(1000, parseInt(document.getElementById('max-turns').value,  10) || 100));
+  const antDensity = Math.max(10, Math.min(100,  parseInt(document.getElementById('ant-density').value, 10) || 20)) / 100;
+  const seed       = Date.now() >>> 0;
 
   _clearDebug();
   document.getElementById('result-message').className = 'hidden';
 
-  _engine = new SimulationEngine({ gridSize, maxTurns, players, seed });
+  _engine = new SimulationEngine({ gridSize, maxTurns, antDensity, players, seed });
   _renderer.gridSize = gridSize;
 
   await _engine.init();
