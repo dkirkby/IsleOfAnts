@@ -6,7 +6,7 @@
 // Renderer bootstrap — draw the empty island on first paint
 // ========================================================================
 const _canvas   = document.getElementById('game-canvas');
-const _renderer = new Renderer(_canvas, parseInt(document.getElementById('grid-size').value, 10));
+const _renderer = new Renderer(_canvas, parseInt(document.getElementById('grid-size').value, 10) || 30);
 
 requestAnimationFrame(() => {
   _renderer._scaleForDPR();
@@ -181,9 +181,9 @@ function _clearDebug() {
 // ── Engine lifecycle ─────────────────────────────────────────────────────
 async function _initEngine() {
   const players    = getPlayers();
-  const gridSize   = Math.max(5,  Math.min(50,   parseInt(gridSizeInput.value, 10) || 20));
+  const gridSize   = Math.max(5,  Math.min(50,   parseInt(gridSizeInput.value, 10) || 30));
   const maxTurns   = Math.max(10, Math.min(1000, parseInt(document.getElementById('max-turns').value,  10) || 100));
-  const antDensity = Math.max(10, Math.min(100,  parseInt(document.getElementById('ant-density').value, 10) || 20)) / 100;
+  const antDensity = Math.max(10, Math.min(100,  parseInt(document.getElementById('ant-density').value, 10) || 30)) / 100;
   const seed       = Date.now() >>> 0;
 
   _clearDebug();
