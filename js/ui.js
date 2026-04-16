@@ -143,13 +143,15 @@ let _busy    = false;  // awaiting engine.step()
 const btnValidate = document.getElementById('btn-validate');
 const btnStart    = document.getElementById('btn-start');
 const btnStep     = document.getElementById('btn-step');
+const btnPause    = document.getElementById('btn-pause');
 const btnReset    = document.getElementById('btn-reset');
 
 function _syncButtons() {
   btnValidate.disabled = _running;
   btnStart.disabled    = _running || (_engine?.done ?? false);
   btnStep.disabled     = _running || (_engine?.done ?? false) || _busy;
-  btnReset.disabled    = !_engine;
+  btnPause.disabled    = !_running;
+  btnReset.disabled    = _running;
 }
 
 // ── Scoreboard & result ──────────────────────────────────────────────────
@@ -292,11 +294,16 @@ btnStep.addEventListener('click', async () => {
   await _doStep();
 });
 
-// Stop / Reset — halt auto-play and reinitialise
-btnReset.addEventListener('click', async () => {
+// Pause — halt auto-play, preserve current state
+btnPause.addEventListener('click', () => {
   _running = false;
   clearTimeout(_timer);
   _timer = null;
+  _syncButtons();
+});
+
+// Reset — reinitialise engine (only available when not playing)
+btnReset.addEventListener('click', async () => {
   await _initEngine();
 });
 
