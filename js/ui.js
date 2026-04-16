@@ -1,4 +1,4 @@
-/* js/ui.js — DOM wiring (Milestones 1–2 + Milestone 7 integration) */
+/* js/ui.js — DOM wiring */
 
 'use strict';
 
@@ -40,17 +40,31 @@ const speedToDelay = v => Math.round(1000 * Math.pow(0.05, (parseInt(v, 10) - 1)
 // ========================================================================
 // Grid size & speed inputs
 // ========================================================================
-const gridSizeInput = document.getElementById('grid-size');
-const gridSizeEcho  = document.getElementById('grid-size-echo');
-const speedSlider   = document.getElementById('speed-slider');
-const speedLabel    = document.getElementById('speed-label');
-const showVectorsEl = document.getElementById('show-vectors');
+const gridSizeInput   = document.getElementById('grid-size');
+const gridSizeEcho    = document.getElementById('grid-size-echo');
+const maxTurnsInput   = document.getElementById('max-turns');
+const antDensityInput = document.getElementById('ant-density');
+const speedSlider     = document.getElementById('speed-slider');
+const speedLabel      = document.getElementById('speed-label');
+const showVectorsEl   = document.getElementById('show-vectors');
 
 gridSizeInput.addEventListener('input', () => {
   const n = Math.max(5, Math.min(50, parseInt(gridSizeInput.value, 10) || 20));
   gridSizeEcho.textContent = n;
   _renderer.gridSize = n;
   _renderer.draw(_engine ? _engine.getState() : null, showVectorsEl.checked);
+  _configDirty = true;
+  _syncButtons();
+});
+
+maxTurnsInput.addEventListener('input', () => {
+  _configDirty = true;
+  _syncButtons();
+});
+
+antDensityInput.addEventListener('input', () => {
+  _configDirty = true;
+  _syncButtons();
 });
 
 speedSlider.addEventListener('input', () => {
@@ -134,24 +148,32 @@ function _removePlayer(card, id) {
 // ========================================================================
 // Simulation state
 // ========================================================================
-let _engine  = null;   // SimulationEngine | null
-let _running = false;  // auto-play active
-let _timer   = null;   // setTimeout handle
-let _busy    = false;  // awaiting engine.step()
+let _engine      = null;   // SimulationEngine | null
+let _running     = false;  // auto-play active
+let _timer       = null;   // setTimeout handle
+let _busy        = false;  // awaiting engine.step()
+let _configDirty = false;  // config changed after Init — Play blocked until re-Init
 
 // ── Button references ────────────────────────────────────────────────────
 const btnValidate = document.getElementById('btn-validate');
-const btnStart    = document.getElementById('btn-start');
+const btnInit     = document.getElementById('btn-init');
+const btnPlay     = document.getElementById('btn-play');
 const btnStep     = document.getElementById('btn-step');
 const btnPause    = document.getElementById('btn-pause');
-const btnReset    = document.getElementById('btn-reset');
+
+function _syncInputs() {
+  const editable = !_engine || _engine.turn === 0;
+  gridSizeInput.disabled   = !editable;
+  maxTurnsInput.disabled   = !editable;
+  antDensityInput.disabled = !editable;
+}
 
 function _syncButtons() {
   btnValidate.disabled = _running;
-  btnStart.disabled    = _running || (_engine?.done ?? false);
-  btnStep.disabled     = _running || (_engine?.done ?? false) || _busy;
+  btnInit.disabled     = _running;
+  btnPlay.disabled     = !_engine || _running || (_engine?.done ?? false) || _configDirty;
+  btnStep.disabled     = !_engine || _running || (_engine?.done ?? false) || _busy || _configDirty;
   btnPause.disabled    = !_running;
-  btnReset.disabled    = _running;
 }
 
 // ── Scoreboard & result ──────────────────────────────────────────────────
@@ -196,9 +218,11 @@ async function _initEngine() {
 
   await _engine.init();
 
+  _configDirty = false;
   const state = _engine.getState();
   _updateScores(state);
   _renderer.draw(state, showVectorsEl.checked);
+  _syncInputs();
   _syncButtons();
 }
 
@@ -221,6 +245,7 @@ async function _doStep() {
     _timer = null;
     _showResult(state.winner);
   }
+  _syncInputs();
   _syncButtons();
 }
 
@@ -260,11 +285,11 @@ btnValidate.addEventListener('click', () => {
   _syncButtons();
 });
 
-// Start — validate first; stop if any errors; otherwise init + auto-play
-btnStart.addEventListener('click', async () => {
+// Init — validate first; stop if any errors; otherwise initialise engine
+btnInit.addEventListener('click', async () => {
   if (_running) return;
 
-  // Implicit validation before starting
+  // Implicit validation before initialising
   const players = getPlayers();
   _clearDebug();
   let valid = true;
@@ -279,6 +304,11 @@ btnStart.addEventListener('click', async () => {
   if (!valid) return;
 
   await _initEngine();
+});
+
+// Play — resume auto-play from current state (requires Init first)
+btnPlay.addEventListener('click', () => {
+  if (!_engine || _running || _engine.done) return;
   _running = true;
   _syncButtons();
   _scheduleNext();
@@ -302,10 +332,7 @@ btnPause.addEventListener('click', () => {
   _syncButtons();
 });
 
-// Reset — reinitialise engine (only available when not playing)
-btnReset.addEventListener('click', async () => {
-  await _initEngine();
-});
 
-// Initial button state
+// Initial state
+_syncInputs();
 _syncButtons();

@@ -12,9 +12,9 @@
 
 // Colours that match the Tropical Terminal theme.
 const _WATER_FILL  = '#07151f';
-const _ISLAND_FILL = '#0f2518';
-const _ANT_FILL    = '#d4a020';   // amber
-const _ANT_GLOW    = 'rgba(212,160,32,0.45)';
+const _ISLAND_FILL = '#c9a84c';   // sandy yellow
+const _ANT_FILL    = '#1a0d04';   // dark brown, like a real ant
+const _ANT_GLOW    = 'rgba(0,0,0,0.35)';
 const _VEC_ANT     = { line: 'rgba(212,160,32,0.55)',  dot: '#d4a020',  label: '#e8b830' };
 const _VEC_SHORE   = { line: 'rgba(74,184,216,0.55)',  dot: '#4ab8d8',  label: '#5ecce8' };
 
@@ -71,13 +71,13 @@ class Renderer {
       PAD + GRID / 2, PAD + GRID / 2, 0,
       PAD + GRID / 2, PAD + GRID / 2, GRID * 0.65
     );
-    ig.addColorStop(0, 'rgba(36,68,30,0.45)');
-    ig.addColorStop(1, 'rgba(0,0,0,0)');
+    ig.addColorStop(0, 'rgba(255,235,160,0.30)');
+    ig.addColorStop(1, 'rgba(120,80,10,0.18)');
     ctx.fillStyle = ig;
     ctx.fillRect(PAD, PAD, GRID, GRID);
 
     // ── 3. Grid lines ────────────────────────────────────────────────────
-    ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+    ctx.strokeStyle = 'rgba(0,0,0,0.10)';
     ctx.lineWidth   = 0.5;
     for (let i = 0; i <= gridSize; i++) {
       const p = PAD + i * cell;
@@ -88,8 +88,26 @@ class Renderer {
     if (!state) return;   // empty island drawn — nothing else to paint
 
     // ── 4. Ants ──────────────────────────────────────────────────────────
-    const antR = Math.max(2, cell * 0.22);
+    const antR = Math.max(1, cell * 0.11);
 
+    // Movement trails — from current cell centre to the cell boundary in the
+    // direction of the previous cell (half a cell in that direction).
+    ctx.strokeStyle = _ANT_FILL;
+    ctx.lineWidth   = Math.max(0.5, antR * 0.5);
+    ctx.globalAlpha = 0.45;
+    ctx.beginPath();
+    for (const ant of state.ants) {
+      if (ant.prevX !== ant.x || ant.prevY !== ant.y) {
+        const ddx = ant.prevX - ant.x;   // direction toward prev: -1, 0, or 1
+        const ddy = ant.prevY - ant.y;
+        ctx.moveTo(cx(ant.x),                   cy(ant.y));
+        ctx.lineTo(cx(ant.x) + ddx * cell / 2,  cy(ant.y) + ddy * cell / 2);
+      }
+    }
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+
+    // Ant dots.
     ctx.save();
     ctx.shadowColor = _ANT_GLOW;
     ctx.shadowBlur  = antR * 2.5;

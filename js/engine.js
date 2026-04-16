@@ -66,7 +66,7 @@ class SimulationEngine {
     }));
     globalRNG.shuffle(allCells);
     const numAnts = Math.round(totalCells * antDensity);
-    this.ants = allCells.slice(0, numAnts);
+    this.ants = allCells.slice(0, numAnts).map(c => ({ x: c.x, y: c.y, prevX: c.x, prevY: c.y }));
 
     // Place each anteater at a random cell (overlaps allowed).
     this.anteaters = this.players.map(player => ({
@@ -96,6 +96,8 @@ class SimulationEngine {
 
     // ── Phase 1: Ant movement ────────────────────────────────────────────
     for (const ant of this.ants) {
+      ant.prevX = ant.x;
+      ant.prevY = ant.y;
       const m  = _MOVES[globalRNG.nextInt(9)];
       const nx = ant.x + m.dx;
       const ny = ant.y + m.dy;
@@ -174,7 +176,7 @@ class SimulationEngine {
 
   getState() {
     return {
-      ants: this.ants.map(a => ({ x: a.x, y: a.y })),
+      ants: this.ants.map(a => ({ x: a.x, y: a.y, prevX: a.prevX, prevY: a.prevY })),
       anteaters: this.anteaters.map(a => ({
         x:     a.x,
         y:     a.y,
