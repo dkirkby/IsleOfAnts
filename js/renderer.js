@@ -15,8 +15,7 @@ const _WATER_FILL  = '#07151f';
 const _ISLAND_FILL = '#c9a84c';   // sandy yellow
 const _ANT_FILL    = '#1a0d04';   // dark brown, like a real ant
 const _ANT_GLOW    = 'rgba(0,0,0,0.35)';
-const _VEC_ANT     = { line: 'rgba(212,160,32,0.55)',  dot: '#d4a020',  label: '#e8b830' };
-const _VEC_SHORE   = { line: 'rgba(74,184,216,0.55)',  dot: '#4ab8d8',  label: '#5ecce8' };
+const _VEC_COLOR = 'rgba(255,255,255,0.88)';
 
 class Renderer {
   /**
@@ -34,7 +33,7 @@ class Renderer {
   // draw — full redraw every frame
   // -----------------------------------------------------------------------
 
-  draw(state, showVectors = false) {
+  draw(state, highlight = null) {
     const { ctx, canvas, gridSize } = this;
     // Use CSS logical dimensions (set by _scaleForDPR).
     // canvas.width/height are physical pixels and must NOT be used here
@@ -123,12 +122,18 @@ class Renderer {
     ctx.fill();
     ctx.restore();
 
-    // ── 5. Dev Mode vector overlays (drawn before anteaters so labels sit on top) ──
-    if (showVectors) {
-      for (const eater of state.anteaters) {
+    // ── 5. Hover vector overlay ───────────────────────────────────────────
+    if (highlight) {
+      const eater = state.anteaters.find(a => a.id === highlight.eaterId);
+      if (eater) {
         const ex = cx(eater.x), ey = cy(eater.y);
-        if (eater.nearestAnt)   this._drawVector(ex, ey, eater.nearestAnt,   cell, _VEC_ANT);
-        if (eater.nearestShore) this._drawVector(ex, ey, eater.nearestShore, cell, _VEC_SHORE);
+        const vecMap = {
+          nearest_ant:      eater.nearestAnt,
+          nearest_anteater: eater.nearestAnteater,
+          nearest_shore:    eater.nearestShore,
+        };
+        const vec = vecMap[highlight.param];
+        if (vec) this._drawVector(ex, ey, vec, cell);
       }
     }
 
@@ -170,20 +175,6 @@ class Renderer {
       ctx.fillStyle = hlg;
       ctx.fill();
 
-      // Name label (hidden at very small cell sizes).
-      if (cell >= 15) {
-        const fontSize = Math.min(11, Math.max(7, Math.floor(cell * 0.38)));
-        ctx.font         = `600 ${fontSize}px "DM Sans", sans-serif`;
-        ctx.textAlign    = 'center';
-        ctx.textBaseline = 'top';
-        const lx = ex;
-        const ly = ey + eaterR + 3;
-        // Shadow pass for readability on any background.
-        ctx.fillStyle = 'rgba(0,0,0,0.75)';
-        ctx.fillText(eater.name, lx + 1, ly + 1);
-        ctx.fillStyle = '#ffffff';
-        ctx.fillText(eater.name, lx, ly);
-      }
     }
 
     // ── 7. HUD — ant count (bottom-left) and turn progress (bottom-right) ──
@@ -222,47 +213,42 @@ class Renderer {
   // Private: draw a vector arrow with a mid-point label
   // -----------------------------------------------------------------------
 
-  _drawVector(ox, oy, vec, cell, palette) {
+  _drawVector(ox, oy, vec, cell) {
     const { ctx } = this;
     const tx = ox + vec.dx * cell;
     const ty = oy + vec.dy * cell;
 
-    // Dashed line from anteater centre to target.
+    // Direction and perpendicular unit vectors.
+    const ldx = tx - ox, ldy = ty - oy;
+    const len = Math.sqrt(ldx * ldx + ldy * ldy) || 1;
+    const ux = ldx / len, uy = ldy / len;
+    const px = -uy,       py = ux;
+
+    // Arrowhead dimensions (scale with cell, capped so they stay tidy).
+    const ah = Math.min(cell * 0.38, 13);  // head length
+    const aw = ah * 0.48;                  // half-width at base
+
+    // Base of arrowhead (line ends here so it doesn't poke through).
+    const bx = tx - ux * ah, by = ty - uy * ah;
+
+    // Dashed shaft.
     ctx.beginPath();
     ctx.moveTo(ox, oy);
-    ctx.lineTo(tx, ty);
-    ctx.strokeStyle = palette.line;
+    ctx.lineTo(bx, by);
+    ctx.strokeStyle = _VEC_COLOR;
     ctx.lineWidth   = 1.5;
     ctx.setLineDash([4, 4]);
     ctx.stroke();
     ctx.setLineDash([]);
 
-    // Small dot at the target end.
+    // Filled arrowhead triangle.
     ctx.beginPath();
-    ctx.arc(tx, ty, 3, 0, Math.PI * 2);
-    ctx.fillStyle = palette.dot;
+    ctx.moveTo(tx,           ty);
+    ctx.lineTo(bx + px * aw, by + py * aw);
+    ctx.lineTo(bx - px * aw, by - py * aw);
+    ctx.closePath();
+    ctx.fillStyle = _VEC_COLOR;
     ctx.fill();
-
-    // Tuple label at the midpoint.
-    const mx   = (ox + tx) / 2;
-    const my   = (oy + ty) / 2;
-    const text = `(${vec.dx}, ${vec.dy})`;
-
-    ctx.font         = '9px "JetBrains Mono", monospace';
-    ctx.textAlign    = 'center';
-    ctx.textBaseline = 'middle';
-
-    // Pill background for legibility.
-    const tw = ctx.measureText(text).width;
-    const ph = 13, pw = tw + 8, pr = 3;
-    const bx = mx - pw / 2, by = my - ph / 2;
-    ctx.fillStyle = 'rgba(6,14,10,0.78)';
-    ctx.beginPath();
-    ctx.roundRect(bx, by, pw, ph, pr);
-    ctx.fill();
-
-    ctx.fillStyle = palette.label;
-    ctx.fillText(text, mx, my);
   }
 
   // -----------------------------------------------------------------------

@@ -479,6 +479,36 @@ header h1 {
 .fn-signature .fn    { color: #82aaff; }
 .fn-signature .param { color: #ffcb8b; }
 
+.fn-signature [data-param] {
+  cursor: help;
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 3px;
+}
+
+.fn-signature [data-param]:hover {
+  color: #ffe0aa;
+}
+
+/* ================================================================
+   PARAM TOOLTIP
+   ================================================================ */
+#vector-tooltip {
+  position: fixed;
+  transform: translateX(-50%) translateY(-100%);
+  margin-top: -6px;
+  background: rgba(6,10,8,0.92);
+  color: #e0d0a0;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  padding: 3px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--border-hi);
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 200;
+}
+
 /* CodeMirror — override to match jungle theme */
 .CodeMirror {
   border: 1px solid var(--border);

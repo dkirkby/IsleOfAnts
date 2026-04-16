@@ -151,6 +151,7 @@ function compilePlayer(player) {
   const body = player.cm.getValue();
   const src  = _buildScript(body, null);
   try {
+    Sk.configure({ read: _builtinRead });
     Sk.compile(src, '<player>', 'exec', false, false);
     return { ok: true };
   } catch (e) {

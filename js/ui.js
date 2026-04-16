@@ -10,7 +10,7 @@ const _renderer = new Renderer(_canvas, parseInt(document.getElementById('grid-s
 
 requestAnimationFrame(() => {
   _renderer._scaleForDPR();
-  _renderer.draw(null, false);
+  _renderer.draw(null);
 });
 
 // ========================================================================
@@ -46,13 +46,12 @@ const maxTurnsInput   = document.getElementById('max-turns');
 const antDensityInput = document.getElementById('ant-density');
 const speedSlider     = document.getElementById('speed-slider');
 const speedLabel      = document.getElementById('speed-label');
-const showVectorsEl   = document.getElementById('show-vectors');
 
 gridSizeInput.addEventListener('input', () => {
   const n = Math.max(5, Math.min(50, parseInt(gridSizeInput.value, 10) || 20));
   gridSizeEcho.textContent = n;
   _renderer.gridSize = n;
-  _renderer.draw(_engine ? _engine.getState() : null, showVectorsEl.checked);
+  _renderer.draw(_engine ? _engine.getState() : null, _hoverHighlight);
   _configDirty = true;
   _syncButtons();
 });
@@ -72,9 +71,57 @@ speedSlider.addEventListener('input', () => {
   if (_running) { clearTimeout(_timer); _scheduleNext(); }
 });
 
-showVectorsEl.addEventListener('change', () => {
-  if (_engine) _renderer.draw(_engine.getState(), showVectorsEl.checked);
-});
+// ========================================================================
+// Param hover tooltip & vector highlight
+// ========================================================================
+const _tooltip = document.createElement('div');
+_tooltip.id = 'vector-tooltip';
+_tooltip.classList.add('hidden');
+document.body.appendChild(_tooltip);
+
+let _hoverHighlight = null;   // { eaterId, param } | null
+
+/** Format a state value (vector, number, or null) as a Python literal. */
+function _fmtParamValue(value) {
+  if (value === null || value === undefined) return 'None';
+  if (typeof value === 'object' && 'dx' in value) return `(${value.dx}, ${value.dy})`;
+  return String(value);
+}
+
+function _onParamEnter(span, card, param) {
+  if (!_engine) return;
+  const state    = _engine.getState();
+  const eaterId  = card.dataset.playerId;
+  const eater    = state.anteaters.find(a => a.id === eaterId);
+  if (!eater) return;
+
+  const valueMap = {
+    nearest_ant:      eater.nearestAnt,
+    nearest_anteater: eater.nearestAnteater,
+    nearest_shore:    eater.nearestShore,
+    current_turn:     state.turn,
+  };
+  _tooltip.textContent = _fmtParamValue(valueMap[param]);
+  _tooltip.classList.remove('hidden');
+  _positionTooltip(span);
+
+  if (param !== 'current_turn') {
+    _hoverHighlight = { eaterId, param };
+    _renderer.draw(state, _hoverHighlight);
+  }
+}
+
+function _onParamLeave() {
+  _tooltip.classList.add('hidden');
+  _hoverHighlight = null;
+  if (_engine) _renderer.draw(_engine.getState(), null);
+}
+
+function _positionTooltip(el) {
+  const r = el.getBoundingClientRect();
+  _tooltip.style.left = `${r.left + r.width / 2}px`;
+  _tooltip.style.top  = `${r.top - 6}px`;
+}
 
 // ========================================================================
 // Player cards
@@ -101,10 +148,10 @@ function addPlayer(name) {
     </div>
     <div class="fn-signature">
       <span class="kw">def</span>
-      <span class="fn"> move</span>(<span class="param">nearest_ant</span>,
-      <span class="param">nearest_anteater</span>,
-      <span class="param">nearest_shore</span>,
-      <span class="param">current_turn</span>):
+      <span class="fn"> move</span>(<span class="param" data-param="nearest_ant">nearest_ant</span>,
+      <span class="param" data-param="nearest_anteater">nearest_anteater</span>,
+      <span class="param" data-param="nearest_shore">nearest_shore</span>,
+      <span class="param" data-param="current_turn">current_turn</span>):
     </div>
     <textarea id="cm-${id}">    return (0, 0)</textarea>
     <div class="debug-label">Debug Output</div>
@@ -113,6 +160,13 @@ function addPlayer(name) {
 
   card.querySelector('.btn-remove').addEventListener('click', () => _removePlayer(card, id));
   document.getElementById('player-list').appendChild(card);
+
+  // Param hover listeners
+  card.querySelectorAll('.fn-signature [data-param]').forEach(span => {
+    const param = span.dataset.param;
+    span.addEventListener('mouseenter', () => _onParamEnter(span, card, param));
+    span.addEventListener('mouseleave', _onParamLeave);
+  });
 
   const cm = CodeMirror.fromTextArea(document.getElementById(`cm-${id}`), {
     mode: 'python', theme: 'dracula', lineNumbers: true,
@@ -168,6 +222,13 @@ function _syncInputs() {
   antDensityInput.disabled = !editable;
 }
 
+function _syncEditors() {
+  const editable = !_engine || _engine.turn === 0;
+  document.querySelectorAll('.player-card').forEach(card => {
+    if (card._cm) card._cm.setOption('readOnly', editable ? false : 'nocursor');
+  });
+}
+
 function _syncButtons() {
   btnValidate.disabled = _running;
   btnInit.disabled     = _running;
@@ -218,11 +279,13 @@ async function _initEngine() {
 
   await _engine.init();
 
-  _configDirty = false;
+  _configDirty    = false;
+  _hoverHighlight = null;
   const state = _engine.getState();
   _updateScores(state);
-  _renderer.draw(state, showVectorsEl.checked);
+  _renderer.draw(state, null);
   _syncInputs();
+  _syncEditors();
   _syncButtons();
 }
 
@@ -235,7 +298,7 @@ async function _doStep() {
   await _engine.step();
 
   const state = _engine.getState();
-  _renderer.draw(state, showVectorsEl.checked);
+  _renderer.draw(state, _hoverHighlight);
   _updateScores(state);
   _busy = false;
 
@@ -246,6 +309,7 @@ async function _doStep() {
     _showResult(state.winner);
   }
   _syncInputs();
+  _syncEditors();
   _syncButtons();
 }
 
@@ -332,7 +396,7 @@ btnPause.addEventListener('click', () => {
   _syncButtons();
 });
 
-
 // Initial state
 _syncInputs();
+_syncEditors();
 _syncButtons();

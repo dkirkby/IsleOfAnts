@@ -120,7 +120,9 @@ class SimulationEngine {
         .filter(a => a !== eater)
         .map(a => ({ x: a.x, y: a.y }));
 
-      const nearestAnt      = SimulationEngine.nearestOf(origin, this.ants);
+      // Exclude ants on the anteater's own cell — they will be eaten this turn.
+      const visibleAnts     = this.ants.filter(a => !(a.x === eater.x && a.y === eater.y));
+      const nearestAnt      = SimulationEngine.nearestOf(origin, visibleAnts);
       const nearestAnteater = SimulationEngine.nearestOf(origin, otherEaters);
       const nearestShore    = SimulationEngine.nearestShoreVector(origin, gridSize);
 
