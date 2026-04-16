@@ -230,6 +230,12 @@ header h1 {
 #result-message.win  { border-color: var(--success); color: var(--success); }
 #result-message.draw { border-color: var(--warning); color: var(--warning); }
 
+#scoreboard #add-player-btn {
+  display: block;
+  width: 100%;
+  margin-top: 12px;
+}
+
 .hidden { display: none !important; }
 
 /* ================================================================
@@ -374,21 +380,6 @@ header h1 {
    ================================================================ */
 #players-section {
   padding: 0 var(--gap) var(--gap);
-}
-
-#players-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 14px;
-}
-
-#players-header h2 {
-  font-size: 0.65rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 1.2px;
-  color: var(--text-dim);
 }
 
 #player-list {
