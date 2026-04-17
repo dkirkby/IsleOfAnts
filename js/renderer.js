@@ -209,7 +209,36 @@ class Renderer {
       ctx.globalAlpha = 1;
     }
 
-    // ── 6. Hover vector overlay (drawn over anteaters) ────────────────────
+    // ── 6. Pending-move vectors / stay markers (drawn over anteaters) ───────
+    // Shows the raw move() return value, clipped to grid bounds — i.e. what
+    // will happen when Step is next clicked.
+    for (const eater of state.anteaters) {
+      if (!eater.pendingMove) continue;
+      const ex = cx(eater.x), ey = cy(eater.y);
+      const { dx, dy } = eater.pendingMove;
+
+      if (!isFinite(dx) || !isFinite(dy) || (dx === 0 && dy === 0)) {
+        // Draw an × inside the player circle.
+        const r = eaterR * 0.42;
+        ctx.save();
+        ctx.strokeStyle = eater.color;
+        ctx.lineWidth   = Math.max(1.5, eaterR * 0.18);
+        ctx.lineCap     = 'round';
+        ctx.globalAlpha = 0.9;
+        ctx.beginPath();
+        ctx.moveTo(ex - r, ey - r); ctx.lineTo(ex + r, ey + r);
+        ctx.moveTo(ex + r, ey - r); ctx.lineTo(ex - r, ey + r);
+        ctx.stroke();
+        ctx.restore();
+      } else {
+        // Raw canvas tip, clipped so the arrow stays within the grid area.
+        const tx = Math.max(PAD, Math.min(PAD + GRID, ex + dx * cell));
+        const ty = Math.max(PAD, Math.min(PAD + GRID, ey - dy * cell));
+        this._drawArrow(ex, ey, tx, ty, eater.color);
+      }
+    }
+
+    // ── 7. Hover vector overlay (drawn over anteaters) ────────────────────
     if (highlight) {
       const eater = state.anteaters.find(a => a.id === highlight.eaterId);
       if (eater) {
@@ -260,40 +289,38 @@ class Renderer {
   // Private: draw a vector arrow with a mid-point label
   // -----------------------------------------------------------------------
 
-  _drawVector(ox, oy, vec, cell) {
+  // Draw an arrow from canvas point (ox,oy) to (tx,ty) in the given color.
+  _drawArrow(ox, oy, tx, ty, color) {
     const { ctx } = this;
-    const tx = ox + vec.dx * cell;
-    const ty = oy - vec.dy * cell;   // vec uses y-up; canvas uses y-down
-
-    // Direction and perpendicular unit vectors.
     const ldx = tx - ox, ldy = ty - oy;
-    const len = Math.sqrt(ldx * ldx + ldy * ldy) || 1;
+    const len = Math.sqrt(ldx * ldx + ldy * ldy);
+    if (len < 1) return;
     const ux = ldx / len, uy = ldy / len;
     const px = -uy,       py = ux;
 
-    // Arrowhead dimensions (scale with cell, capped so they stay tidy).
-    const ah = Math.min(cell * 0.38, 13);  // head length
-    const aw = ah * 0.48;                  // half-width at base
-
-    // Base of arrowhead (line ends here so it doesn't poke through).
+    const ah = Math.min(len * 0.5, 13);   // head ≤ half of arrow length
+    const aw = ah * 0.48;
     const bx = tx - ux * ah, by = ty - uy * ah;
 
-    // Solid shaft.
     ctx.beginPath();
     ctx.moveTo(ox, oy);
     ctx.lineTo(bx, by);
-    ctx.strokeStyle = _VEC_COLOR;
+    ctx.strokeStyle = color;
     ctx.lineWidth   = 1.5;
     ctx.stroke();
 
-    // Filled arrowhead triangle.
     ctx.beginPath();
     ctx.moveTo(tx,           ty);
     ctx.lineTo(bx + px * aw, by + py * aw);
     ctx.lineTo(bx - px * aw, by - py * aw);
     ctx.closePath();
-    ctx.fillStyle = _VEC_COLOR;
+    ctx.fillStyle = color;
     ctx.fill();
+  }
+
+  // Draw a vector arrow using y-up math convention; delegates to _drawArrow.
+  _drawVector(ox, oy, vec, cell, color = _VEC_COLOR) {
+    this._drawArrow(ox, oy, ox + vec.dx * cell, oy - vec.dy * cell, color);
   }
 
   // -----------------------------------------------------------------------

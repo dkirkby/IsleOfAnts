@@ -78,6 +78,7 @@ class SimulationEngine {
       return {
         player, x: c.x, y: c.y, prevX: c.x, prevY: c.y, score: 0,
         lastNearestAnt: null, lastNearestAnteater: null, lastNearestShore: null,
+        pendingMove: null, pendingOutput: [], pendingError: null,
       };
     });
 
@@ -85,9 +86,8 @@ class SimulationEngine {
     this.done   = false;
     this.winner = null;
 
-    // Pre-compute nearest vectors so hover tooltips reflect the initial board
-    // state and match the values that will be passed to move() on turn 1.
-    for (const eater of this.anteaters) this._computeNearest(eater);
+    // Pre-compute moves so arrows are visible immediately after Init.
+    await this._precomputeMoves();
   }
 
   // -----------------------------------------------------------------------
@@ -122,31 +122,20 @@ class SimulationEngine {
     }
 
     // ── Phase 2: Anteater movement ───────────────────────────────────────
-    // Snapshot nearest vectors for all anteaters before any moves so every
-    // player sees the same start-of-turn board state.
-    for (const eater of this.anteaters) this._computeNearest(eater);
-
-    // Randomise execution order each turn.
+    // Moves were pre-computed by _precomputeMoves(); apply them now.
+    // Randomise execution order each turn (consumed by globalRNG for determinism).
     const order = globalRNG.shuffle([...this.anteaters]);
 
     for (const eater of order) {
-      // Run the player's Python move() function.
-      const result = await callMove(
-        eater.player,
-        eater.lastNearestAnt,       // null when ants.length === 0
-        eater.lastNearestAnteater,  // null when playing solo
-        eater.lastNearestShore,
-        this.turn + 1,    // 1-indexed current turn
-      );
-
-      // Route debug output / errors to the player's panel.
-      if (result.output.length > 0 || result.error) {
-        this._appendDebug(eater.player.id, result.output, result.error);
+      // Flush pre-computed debug output / errors to the player's panel.
+      if (eater.pendingOutput.length > 0 || eater.pendingError) {
+        this._appendDebug(eater.player.id, eater.pendingOutput, eater.pendingError);
       }
 
-      // Snap the returned vector to the nearest compass direction, then apply
-      // the move, cancelling it if it would leave the grid or enter water.
-      const { dx, dy } = SimulationEngine._snapDirection(result.dx, result.dy);
+      // Snap the pre-computed raw move to the nearest compass direction and apply.
+      const { dx, dy } = eater.pendingMove
+        ? SimulationEngine._snapDirection(eater.pendingMove.dx, eater.pendingMove.dy)
+        : { dx: 0, dy: 0 };
       eater.prevX = eater.x;
       eater.prevY = eater.y;
       const nx = eater.x + dx;
@@ -173,6 +162,9 @@ class SimulationEngine {
       this.done = true;
       this._resolveWinner();
     }
+
+    // Pre-compute the next turn's moves so arrows are ready to display.
+    if (!this.done) await this._precomputeMoves();
   }
 
   // -----------------------------------------------------------------------
@@ -194,6 +186,7 @@ class SimulationEngine {
         nearestAnt:      a.lastNearestAnt,
         nearestAnteater: a.lastNearestAnteater,
         nearestShore:    a.lastNearestShore,
+        pendingMove:     a.pendingMove,
       })),
       islandMask: this.islandMask,   // shared ref — read-only for renderer
       scores:   Object.fromEntries(this.anteaters.map(a => [a.player.id, a.score])),
@@ -303,6 +296,27 @@ class SimulationEngine {
   // -----------------------------------------------------------------------
   // Private helpers
   // -----------------------------------------------------------------------
+
+  /**
+   * Call move() for every anteater, storing the raw result in pendingMove so
+   * the renderer can display arrows before the step executes.
+   * Also refreshes nearest-entity vectors (the snapshot passed to move()).
+   */
+  async _precomputeMoves() {
+    for (const eater of this.anteaters) this._computeNearest(eater);
+    for (const eater of this.anteaters) {
+      const result = await callMove(
+        eater.player,
+        eater.lastNearestAnt,
+        eater.lastNearestAnteater,
+        eater.lastNearestShore,
+        this.turn + 1,        // 1-indexed turn this move will execute on
+      );
+      eater.pendingMove   = { dx: result.dx, dy: result.dy };
+      eater.pendingOutput = result.output;
+      eater.pendingError  = result.error;
+    }
+  }
 
   /**
    * Compute and store nearest-entity vectors on eater.lastNearest*.
