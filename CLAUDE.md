@@ -59,5 +59,7 @@ Re-running without code/settings changes must produce identical results.
 2. **Anteater phase** — randomized execution order; off-grid moves canceled; eating resolved after all moves
 3. **End check** — stop when max turns reached or 0 ants remain; highest score wins (ties → draw)
 
+**Important:** `move()` is pre-computed (via `_precomputeMoves()`) at the *end* of the previous turn, after phases 1–3 complete. This means `nearest_ant` reflects ant positions from the end of the previous turn — **before** ants move in the current turn's phase 1. Moving toward `nearest_ant` does not guarantee eating that ant; it may have moved away by the time the anteater executes. This is intentional: ants are moving targets and students must anticipate their movement.
+
 ### Dev Mode ("Show Vectors")
 Checkbox toggles canvas overlay: faint lines from each anteater to its `nearest_ant` and `nearest_shore`, with tuple text labels.

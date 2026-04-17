@@ -16,7 +16,7 @@
 
 'use strict';
 
-const _OFFSET = 3;       // wrapper lines before student code
+const _OFFSET = 4;       // wrapper lines before student code (3 header lines + def line)
 const _TIMEOUT = 200;    // ms
 
 // ---------------------------------------------------------------------------

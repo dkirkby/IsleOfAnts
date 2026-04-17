@@ -227,7 +227,6 @@ let _busy        = false;  // awaiting engine.step()
 let _configDirty = false;  // config changed after Init — Play blocked until re-Init
 
 // ── Button references ────────────────────────────────────────────────────
-const btnValidate = document.getElementById('btn-validate');
 const btnInit     = document.getElementById('btn-init');
 const btnPlay     = document.getElementById('btn-play');
 const btnStep     = document.getElementById('btn-step');
@@ -250,7 +249,6 @@ function _syncEditors() {
 }
 
 function _syncButtons() {
-  btnValidate.disabled = _running;
   btnInit.disabled     = _running;
   btnPlay.disabled     = !_engine || _running || (_engine?.done ?? false) || _configDirty;
   btnStep.disabled     = !_engine || _running || (_engine?.done ?? false) || _busy || _configDirty;
@@ -357,29 +355,6 @@ function _scheduleNext() {
 // ========================================================================
 // Button handlers
 // ========================================================================
-
-// Validate — syntax-check all players, surface errors in debug panels
-btnValidate.addEventListener('click', () => {
-  _clearDebug();
-  const players = getPlayers();
-  let allOk = true;
-
-  for (const p of players) {
-    const res = compilePlayer(p);
-    if (!res.ok) {
-      const el = document.getElementById(`debug-${p.id}`);
-      if (el) el.textContent = `[SYNTAX ERROR] ${res.error}\n`;
-      allOk = false;
-    }
-  }
-
-  if (allOk && players.length > 0) {
-    const orig = btnValidate.textContent;
-    btnValidate.textContent = 'Validate Code ✓';
-    setTimeout(() => { btnValidate.textContent = orig; }, 1800);
-  }
-  _syncButtons();
-});
 
 // Init — validate first; stop if any errors; otherwise initialise engine
 btnInit.addEventListener('click', async () => {
