@@ -62,6 +62,8 @@ class Renderer {
     ctx.fillStyle = wg;
     ctx.fillRect(0, 0, W, H);
 
+    if (!state) return;   // water only — no island until after Init
+
     // ── 2. Island (land cells only; full square when no mask yet) ────────
     const mask = state?.islandMask ?? null;
 
@@ -111,7 +113,6 @@ class Renderer {
       }
     }
 
-    if (!state) return;   // empty island drawn — nothing else to paint
 
     // ── 4. Ants ──────────────────────────────────────────────────────────
     const antR = Math.max(1, cell * 0.11);
@@ -221,7 +222,7 @@ class Renderer {
         // Draw an × inside the player circle.
         const r = eaterR * 0.42;
         ctx.save();
-        ctx.strokeStyle = eater.color;
+        ctx.strokeStyle = 'rgba(255,255,255,0.9)';
         ctx.lineWidth   = Math.max(1.5, eaterR * 0.18);
         ctx.lineCap     = 'round';
         ctx.globalAlpha = 0.9;
@@ -253,36 +254,6 @@ class Renderer {
       }
     }
 
-    // ── 7. HUD — ant count (bottom-left) and turn progress (bottom-right) ──
-    this._drawHUD(ctx, state, W, PAD, GRID);
-  }
-
-  _drawHUD(ctx, state, W, PAD, GRID) {
-    const antCount  = state.ants.length;
-    const turn      = state.turn;
-    const maxTurns  = state.maxTurns ?? '?';
-
-    // Vertical centre of the bottom water border.
-    const y = PAD + GRID + PAD / 2;
-
-    ctx.font         = `500 11px "DM Sans", sans-serif`;
-    ctx.textBaseline = 'middle';
-
-    // Ant count — bottom-left
-    const antText = `${antCount} ant${antCount !== 1 ? 's' : ''}`;
-    ctx.textAlign = 'left';
-    ctx.fillStyle = 'rgba(0,0,0,0.55)';
-    ctx.fillText(antText, PAD + 1, y + 1);
-    ctx.fillStyle = '#d4a020';
-    ctx.fillText(antText, PAD, y);
-
-    // Turn progress — bottom-right
-    const turnText = `${turn} / ${maxTurns}`;
-    ctx.textAlign = 'right';
-    ctx.fillStyle = 'rgba(0,0,0,0.55)';
-    ctx.fillText(turnText, PAD + GRID + 1, y + 1);
-    ctx.fillStyle = '#7a9080';
-    ctx.fillText(turnText, PAD + GRID, y);
   }
 
   // -----------------------------------------------------------------------

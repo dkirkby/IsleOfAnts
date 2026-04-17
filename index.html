@@ -32,8 +32,8 @@
   <div class="header-settings">
     <label class="header-field">
       <span>Grid</span>
-      <input type="number" id="grid-size" min="5" max="50" value="30">
-      <span class="unit">×<span id="grid-size-echo">30</span></span>
+      <input type="number" id="grid-size" min="5" max="50" value="50">
+      <span class="unit">×<span id="grid-size-echo">50</span></span>
     </label>
     <label class="header-field">
       <span>Max Turns</span>
@@ -65,6 +65,10 @@
       </tbody>
     </table>
     <div id="result-message" class="hidden"></div>
+    <div id="sim-stats">
+      <span id="stat-ants"></span>
+      <span id="stat-turn"></span>
+    </div>
     <button id="add-player-btn" class="btn btn-secondary">+ Add Player</button>
   </div>
 

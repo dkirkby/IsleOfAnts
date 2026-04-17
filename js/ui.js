@@ -6,7 +6,7 @@
 // Renderer bootstrap — draw the empty island on first paint
 // ========================================================================
 const _canvas   = document.getElementById('game-canvas');
-const _renderer = new Renderer(_canvas, parseInt(document.getElementById('grid-size').value, 10) || 30);
+const _renderer = new Renderer(_canvas, parseInt(document.getElementById('grid-size').value, 10) || 50);
 
 requestAnimationFrame(() => {
   _renderer._scaleForDPR();
@@ -52,19 +52,23 @@ gridSizeInput.addEventListener('input', () => {
   const n = Math.max(5, Math.min(50, parseInt(gridSizeInput.value, 10) || 20));
   gridSizeEcho.textContent = n;
   _renderer.gridSize = n;
-  const _gridState = (_engine && _engine.gridSize === n) ? _engine.getState() : null;
-  _renderer.draw(_gridState, _hoverHighlight, showTrailsEl.checked);
   _configDirty = true;
+  _renderer.draw(null);
+  _updateHUD(null);
   _syncButtons();
 });
 
 maxTurnsInput.addEventListener('input', () => {
   _configDirty = true;
+  _renderer.draw(null);
+  _updateHUD(null);
   _syncButtons();
 });
 
 antDensityInput.addEventListener('input', () => {
   _configDirty = true;
+  _renderer.draw(null);
+  _updateHUD(null);
   _syncButtons();
 });
 
@@ -105,7 +109,7 @@ function _onParamEnter(span, card, param) {
     nearest_ant:      eater.nearestAnt,
     nearest_anteater: eater.nearestAnteater,
     nearest_shore:    eater.nearestShore,
-    current_turn:     state.turn,
+    current_turn:     state.turn + 1,
   };
   _tooltip.textContent = _fmtParamValue(valueMap[param]);
   _tooltip.classList.remove('hidden');
@@ -135,6 +139,8 @@ function _positionTooltip(el) {
 document.getElementById('add-player-btn').addEventListener('click', () => {
   addPlayer(`Player ${playerCount + 1}`);
   _configDirty = true;
+  _renderer.draw(null);
+  _updateHUD(null);
   _syncButtons();
 });
 
@@ -161,7 +167,7 @@ function addPlayer(name) {
       <span class="param" data-param="nearest_shore">nearest_shore</span>,
       <span class="param" data-param="current_turn">current_turn</span>):
     </div>
-    <textarea id="cm-${id}">    return (0, 0)</textarea>
+    <textarea id="cm-${id}">return (0, 0)</textarea>
     <div class="debug-label">Debug Output</div>
     <div class="debug-output" id="debug-${id}"></div>
   `;
@@ -206,6 +212,8 @@ function _removePlayer(card, id) {
   card.remove();
   document.querySelector(`#score-body [data-player-id="${id}"]`)?.remove();
   _configDirty = true;
+  _renderer.draw(null);
+  _updateHUD(null);
   _syncButtons();
 }
 
@@ -257,6 +265,16 @@ function _updateScores(state) {
   }
 }
 
+function _updateHUD(state) {
+  const antCount = state ? state.ants.length : null;
+  const turn     = state ? state.turn        : null;
+  const maxTurns = state ? state.maxTurns    : null;
+  document.getElementById('stat-ants').textContent =
+    antCount !== null ? `${antCount} ant${antCount !== 1 ? 's' : ''}` : '';
+  document.getElementById('stat-turn').textContent =
+    turn !== null ? `${turn} / ${maxTurns}` : '';
+}
+
 function _showResult(winner) {
   const el = document.getElementById('result-message');
   el.className = '';
@@ -295,6 +313,7 @@ async function _initEngine() {
   _hoverHighlight = null;
   const state = _engine.getState();
   _updateScores(state);
+  _updateHUD(state);
   _renderer.draw(state, null, showTrailsEl.checked);
   _syncInputs();
   _syncEditors();
@@ -312,6 +331,7 @@ async function _doStep() {
   const state = _engine.getState();
   _renderer.draw(state, _hoverHighlight, showTrailsEl.checked);
   _updateScores(state);
+  _updateHUD(state);
   _busy = false;
 
   if (state.done) {
@@ -416,8 +436,9 @@ let _canvasUserWidth = null;   // null = fill available width (CSS default)
 
 function _rescaleAndDraw() {
   _renderer._scaleForDPR();
-  const state = _engine ? _engine.getState() : null;
+  const state = (_engine && !_configDirty) ? _engine.getState() : null;
   _renderer.draw(state, _hoverHighlight, showTrailsEl.checked);
+  _updateHUD(state);
 }
 
 function _applyCanvasWidth(px) {

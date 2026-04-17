@@ -230,6 +230,19 @@ header h1 {
 #result-message.win  { border-color: var(--success); color: var(--success); }
 #result-message.draw { border-color: var(--warning); color: var(--warning); }
 
+#sim-stats {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+  padding: 6px 6px 0;
+  border-top: 1px solid var(--surface2);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+}
+
+#stat-ants  { color: #d4a020; }
+#stat-turn  { color: var(--text-muted); }
+
 #scoreboard #add-player-btn {
   display: block;
   width: 100%;
