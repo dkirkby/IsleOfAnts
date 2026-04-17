@@ -78,7 +78,7 @@ class SimulationEngine {
       return {
         player, x: c.x, y: c.y, prevX: c.x, prevY: c.y, score: 0,
         lastNearestAnt: null, lastNearestAnteater: null, lastNearestShore: null,
-        pendingMove: null, pendingOutput: [], pendingError: null,
+        pendingMove: null,
       };
     });
 
@@ -127,11 +127,6 @@ class SimulationEngine {
     const order = globalRNG.shuffle([...this.anteaters]);
 
     for (const eater of order) {
-      // Flush pre-computed debug output / errors to the player's panel.
-      if (eater.pendingOutput.length > 0 || eater.pendingError) {
-        this._appendDebug(eater.player.id, eater.pendingOutput, eater.pendingError);
-      }
-
       // Snap the pre-computed raw move to the nearest compass direction and apply.
       const { dx, dy } = eater.pendingMove
         ? SimulationEngine._snapDirection(eater.pendingMove.dx, eater.pendingMove.dy)
@@ -312,9 +307,10 @@ class SimulationEngine {
         eater.lastNearestShore,
         this.turn + 1,        // 1-indexed turn this move will execute on
       );
-      eater.pendingMove   = { dx: result.dx, dy: result.dy };
-      eater.pendingOutput = result.output;
-      eater.pendingError  = result.error;
+      eater.pendingMove = { dx: result.dx, dy: result.dy };
+      if (result.output.length > 0 || result.error) {
+        this._appendDebug(eater.player.id, result.output, result.error);
+      }
     }
   }
 
