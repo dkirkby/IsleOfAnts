@@ -23,14 +23,22 @@ A hands-on introduction for students who have completed ~3 weeks of an intro Pyt
 
 ## Activity 2 — Your First Move
 
-**Goal:** Return a fixed direction and observe the effect.
+**Goal:** Add a player, understand the code editor, and control an anteater with a fixed return value.
 
-- Replace the default code with `return (1, 0)` — always move right
-- Init and Step a few times; watch the anteater march toward the shore and stop
-- Try each of the eight possible constant moves: `(1,0)`, `(-1,0)`, `(0,1)`, `(0,-1)`, and the four diagonals
-- Observe that moves into the shore are canceled (anteater stays put)
+- Click **Add Player**; observe the code editor appear with the read-only function signature above and the editable body (`return (0, 0)`) below. Ignore the function signature for now.
+- Click on "Player 1" above the code and enter your name.
+- Click **Init**; identify the anteater on the island — it is a colored circle containing a white ×.
+- Click **Play** and observe that your anteater stays put while ants move around it.
+- Each time an ant randomly moves onto your tile, your score (top left) increases by one.
+- The code `return (0, 0)` instructs your anteater to not move. This is visually indicated by the white ×.
+- You can only edit the code when there is no simulation in process: click **Pause** if necessary, then **Init**.
+- Change the code to `return (1, 0)` then click **Init**. Notice the white × is replaced by an arrow pointing one cell to the right: the value `(1, 0)` means change `x` by 1 and change `y` by 0.
+- Click **Step** several times and watch your anteater move right one cell per turn until it reaches the shore
+- Explain the `(dx, dy)` convention: `dx` is left/right (positive = right), `dy` is up/down (positive = down)
+- Try changing the return value to move in all eight possible compass directions (N,NE,E,SE,S,SW,W,NW)
+- Observe that a move into the water is canceled — the anteater stays put rather than leaving the island
 
-*Key ideas:* `(dx, dy)` coordinates; diagonal moves; shore boundary.
+*Key ideas:* adding a player; `(dx, dy)` return tuple; eight directions; shore boundary; × marker for `(0, 0)`; arrow for other return values.
 
 ---
 
