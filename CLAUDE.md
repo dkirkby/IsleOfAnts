@@ -39,7 +39,7 @@ The CodeMirror editor shows only the function body. The function signature is di
 def move(nearest_ant, nearest_anteater, nearest_shore, current_turn):
     # returns (dx, dy) where dx, dy ∈ {-1, 0, 1}
 ```
-- Vectors are 2-tuples of integers: `(dx, dy)` = relative position of nearest entity.
+- Vectors are 2-tuples of integers: `(dx, dy)` = relative position of nearest entity. **`dy` is positive upward** (mathematical convention, not screen convention): `(0, 1)` moves up, `(0, -1)` moves down.
 - Invalid return type/range or timeout → default to `(0, 0)`, log error to Debug Panel.
 
 ### Determinism
