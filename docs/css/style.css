@@ -101,6 +101,13 @@ header h1 {
   white-space: nowrap;
 }
 
+.tutorial-link {
+  color: var(--accent-dim);
+  text-decoration: none;
+  margin-left: 8px;
+}
+.tutorial-link:hover { color: var(--accent); }
+
 /* Grid settings in header */
 .header-settings {
   display: flex;
