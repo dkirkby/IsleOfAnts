@@ -99,7 +99,7 @@ function _fmtParamValue(value) {
 }
 
 function _onParamEnter(span, card, param) {
-  if (!_engine) return;
+  if (!_engine || _configDirty) return;
   const state    = _engine.getState();
   const eaterId  = card.dataset.playerId;
   const eater    = state.anteaters.find(a => a.id === eaterId);
@@ -124,7 +124,7 @@ function _onParamEnter(span, card, param) {
 function _onParamLeave() {
   _tooltip.classList.add('hidden');
   _hoverHighlight = null;
-  if (_engine) _renderer.draw(_engine.getState(), null, showTrailsEl.checked);
+  if (_engine && !_configDirty) _renderer.draw(_engine.getState(), null, showTrailsEl.checked);
 }
 
 function _positionTooltip(el) {
@@ -464,3 +464,4 @@ window.addEventListener('mouseup', () => {
 _syncInputs();
 _syncEditors();
 _syncButtons();
+_applyCanvasWidth(window.innerHeight / 2);
