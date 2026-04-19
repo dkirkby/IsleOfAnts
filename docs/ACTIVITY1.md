@@ -27,6 +27,8 @@ Click **Init** several more times and observe:
 - The number and positions of the ants change too.
 - The ocean and land colors stay the same; only the layout varies.
 
+You can change the size of the island display by dragging its bottom-left corner. Try this now.
+
 > **Why does it look different every time?** Each click of Init picks a new random seed, which drives both the island shape and the initial placement of ants.
 
 ---
