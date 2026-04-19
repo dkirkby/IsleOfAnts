@@ -226,6 +226,12 @@ let _timer       = null;   // setTimeout handle
 let _busy        = false;  // awaiting engine.step()
 let _configDirty = false;  // config changed after Init — Play blocked until re-Init
 
+// ── Splash screen ────────────────────────────────────────────────────────
+const _splash = document.getElementById('splash');
+document.getElementById('controls-bar').addEventListener('click', () => {
+  if (_splash) _splash.remove();
+}, { once: true });
+
 // ── Button references ────────────────────────────────────────────────────
 const btnInit     = document.getElementById('btn-init');
 const btnPlay     = document.getElementById('btn-play');
