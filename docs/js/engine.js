@@ -10,18 +10,11 @@
  *   SimulationEngine.nearestOf(origin, targets)                   → {dx,dy} | null
  *   SimulationEngine.nearestShoreVector(pos, gridSize, isWater)   → {dx,dy}
  *
- * Depends on globals from rng.js (globalRNG, setGlobalSeed) and
- * skulkt-bridge.js (callMove, seedSkulkt).
+ * Depends on globals from rng.js (globalRNG, setGlobalSeed),
+ * skulkt-bridge.js (callMove, seedSkulkt), and ant-ai.js (antMove).
  */
 
 'use strict';
-
-// All 9 possible unit moves (including stay-in-place).
-const _MOVES = [
-  {dx:-1, dy:-1}, {dx:0, dy:-1}, {dx:1, dy:-1},
-  {dx:-1, dy: 0}, {dx:0, dy: 0}, {dx:1, dy: 0},
-  {dx:-1, dy: 1}, {dx:0, dy: 1}, {dx:1, dy: 1},
-];
 
 class SimulationEngine {
   /**
@@ -60,6 +53,16 @@ class SimulationEngine {
 
     // Generate irregular island shape.
     this.islandMask = this._generateIsland();
+
+    // Precompute shore vector for every land cell (O(landCells × gridSize²),
+    // done once here so per-turn lookups are O(1) for both ants and anteaters).
+    const isWater = (x, y) => this.islandMask[y][x];
+    this.shoreVectors = Array.from({ length: gridSize }, (_, y) =>
+      Array.from({ length: gridSize }, (_, x) =>
+        isWater(x, y) ? { dx: 0, dy: 0 }
+                      : SimulationEngine.nearestShoreVector({ x, y }, gridSize, isWater)
+      )
+    );
 
     // Collect all land cells.
     const landCells = [];
@@ -103,16 +106,25 @@ class SimulationEngine {
     // Track occupied cells so no two ants share a cell after moving.
     const _key = (x, y) => x * gridSize + y;
     const occupied = new Set(this.ants.map(a => _key(a.x, a.y)));
+    const eaterPositions = this.anteaters.map(a => ({ x: a.x, y: a.y }));
 
     for (const ant of this.ants) {
       ant.prevX = ant.x;
       ant.prevY = ant.y;
-      const m  = _MOVES[globalRNG.nextInt(9)];
-      const nx = ant.x + m.dx;
-      const ny = ant.y + m.dy;
+
+      // Build context args (same API and y-up convention as anteater move()).
+      const origin        = { x: ant.x, y: ant.y };
+      const nearestAnt      = SimulationEngine.nearestOf(origin, this.ants.filter(a => a !== ant));
+      const nearestAnteater = SimulationEngine.nearestOf(origin, eaterPositions);
+      const nearestShore    = this.shoreVectors[ant.y][ant.x];
+      const raw        = antMove(nearestAnt, nearestAnteater, nearestShore, this.turn + 1);
+      const { dx, dy } = SimulationEngine._snapDirection(raw.dx ?? 0, raw.dy ?? 0);
+
       // Free this ant's cell before testing the target, so that stay-in-place
       // (0,0) and moves into a vacated cell are both handled correctly.
       occupied.delete(_key(ant.x, ant.y));
+      const nx = ant.x + dx;
+      const ny = ant.y - dy;   // y-up → y-down (matches anteater convention)
       if (nx >= 0 && nx < gridSize && ny >= 0 && ny < gridSize &&
           !this.islandMask[ny][nx] && !occupied.has(_key(nx, ny))) {
         ant.x = nx;
@@ -330,8 +342,7 @@ class SimulationEngine {
       .filter(a => !(a.x === eater.x && a.y === eater.y));
     eater.lastNearestAnt      = SimulationEngine.nearestOf(origin, visibleAnts);
     eater.lastNearestAnteater = SimulationEngine.nearestOf(origin, otherEaters);
-    eater.lastNearestShore    = SimulationEngine.nearestShoreVector(
-      origin, gridSize, (x, y) => this.islandMask[y][x]);
+    eater.lastNearestShore    = this.shoreVectors[eater.y][eater.x];
   }
 
   /**

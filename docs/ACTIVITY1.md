@@ -41,12 +41,14 @@ The ants begin moving around the island. Watch for a few seconds, then click **S
 
 Here is what is happening each turn:
 
-- Every ant independently picks a random direction: up, down, left, right, or one of the four diagonals (eight choices total).
-- If that move would take the ant off the island into the water, the move is **canceled** and the ant stays put.
-- If that move would land on a cell already occupied by another ant, the move is also **canceled**.
+- Every ant follows its own movement strategy — the same strategy is shared by all ants, but the details are not revealed. Part of the challenge is figuring out how the ants behave so you can write a better anteater strategy.
+- If a move would take the ant off the island into the water, the move is **canceled** and the ant stays put.
+- If a move would land on a cell already occupied by another ant, the move is also **canceled**.
 - Otherwise the ant moves to the new cell.
 
 Play automatically stops when **Max Turns** is reached (100 by default) or when all ants have been eaten. Since there are no players yet, the ants simply keep moving until the turn limit.
+
+> **Tip:** Running the simulation with no players added is a good way to study ant movement patterns without your anteater interfering.
 
 You can control the speed of play using the **SPEED** slider.
 
@@ -94,7 +96,7 @@ The simulation settings appear along the top of the window. These can only be ch
 Before moving on, make sure you can answer these questions:
 
 1. What does clicking **Init** do, and why does the island look different each time?
-2. What are the rules that determine whether an ant moves or stays put on a given turn?
+2. What conditions cause an ant's attempted move to be canceled?
 3. What does the trail line attached to each ant represent?
 4. What two conditions cause Play to stop automatically?
 
