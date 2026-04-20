@@ -10,10 +10,18 @@ Click **Add Player** in the scoreboard area on the left.
 
 A code editor appears. It has two parts:
 
-- The **function signature** at the top, displayed in grey — this is read-only and you cannot edit it. It shows the name of the function your anteater will call every turn and the names of the inputs it receives. You will learn what those inputs mean in later activities; ignore them for now.
-- The **editable body** below the signature — this is where you write your Python code. It starts with the single line `return (0, 0)`.
+- A fixed (non-editable) declaration of the function that controls each player's anteater:
+```python
+def move(nearest_ant, nearest_anteater, nearest_shore, current_turn):
+```
+This is known as the **function signature** and specifies what the code you write will have to work with. You will learn what those function inputs mean in later activities; ignore them for now.
+- The **editable body** below the signature — this is where you write your Python code. It starts with the default single line:
+```python
+  return (0, 0)
+```
+Note the gray number 1 to the left of this line. This is a code line number. Your code will eventually have multiple lines and these line numbers will help locate any code errors that are reported.
 
-Click on the name **Player 1** above the editor and replace it with your own name.
+Click on the name **Player 1** above the code editor (not the scorebox) and replace it with your own name.
 
 ---
 

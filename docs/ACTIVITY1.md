@@ -19,7 +19,7 @@ Take a moment to look at the Setup panel. You will see fields for **Grid** (the 
 
 Click **Init**.
 
-An island appears: the yellow cells are land; the blue surrounding area is water. Small dots scattered across the land are **ants**.
+An island appears: the yellow cells are land; the blue surrounding area is water. Some edges of the island might be straight, in order fit within the square display, but the island is entirely surrounded by water. Small dots scattered across the land are **ants**.
 
 Click **Init** several more times and observe:
 
@@ -27,7 +27,7 @@ Click **Init** several more times and observe:
 - The number and positions of the ants change too.
 - The ocean and land colors stay the same; only the layout varies.
 
-You can change the size of the island display by dragging its bottom-left corner. Try this now.
+You can change the size of the island display by dragging its bottom-right corner. Try this now.
 
 > **Why does it look different every time?** Each click of Init picks a new random seed, which drives both the island shape and the initial placement of ants.
 
@@ -37,7 +37,7 @@ You can change the size of the island display by dragging its bottom-left corner
 
 Click **Init** once to get a fresh island, then click **Play**.
 
-The ants begin moving around the island. Watch for a few seconds, then click **Stop**.
+The ants begin moving around the island. Watch for a few seconds, then click **Pause**.
 
 Here is what is happening each turn:
 
