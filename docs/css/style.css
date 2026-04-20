@@ -296,6 +296,30 @@ header h1 {
   display: block;
 }
 
+#splash-tutorial-btn {
+  position: absolute;
+  bottom: 18%;
+  left: 50%;
+  transform: translateX(-50%);
+  pointer-events: auto;
+  background: var(--accent);
+  color: #0a0a0a;
+  font-family: var(--font-ui);
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-decoration: none;
+  padding: 10px 22px;
+  border-radius: 999px;
+  white-space: nowrap;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.55);
+  transition: background 0.15s, transform 0.15s;
+}
+
+#splash-tutorial-btn:hover {
+  background: var(--accent-hi);
+  transform: translateX(-50%) scale(1.04);
+}
+
 #canvas-resize-handle {
   position: absolute;
   bottom: 4px;
