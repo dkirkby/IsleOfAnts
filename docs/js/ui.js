@@ -192,6 +192,10 @@ function addPlayer(name) {
   });
   card._cm = cm;
 
+  cm.on('change', () => {
+    if (!_configDirty) { _configDirty = true; _syncButtons(); }
+  });
+
   // Scoreboard row
   const tr = document.createElement('tr');
   tr.dataset.playerId = id;
@@ -378,7 +382,13 @@ btnInit.addEventListener('click', async () => {
       valid = false;
     }
   }
-  if (!valid) return;
+  if (!valid) {
+    _engine = null;
+    _syncInputs();
+    _syncEditors();
+    _syncButtons();
+    return;
+  }
 
   await _initEngine();
 });
