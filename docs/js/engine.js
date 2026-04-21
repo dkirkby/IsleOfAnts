@@ -38,6 +38,7 @@ class SimulationEngine {
     this.turn      = 0;
     this.done      = false;
     this.winner    = null;
+    this._antIdCounter = 0;
   }
 
   // -----------------------------------------------------------------------
@@ -73,7 +74,9 @@ class SimulationEngine {
     // Place ants on random distinct land cells (~antDensity of land tiles).
     globalRNG.shuffle(landCells);
     const numAnts = Math.round(landCells.length * antDensity);
-    this.ants = landCells.slice(0, numAnts).map(c => ({ x: c.x, y: c.y, prevX: c.x, prevY: c.y }));
+    this.ants = landCells.slice(0, numAnts).map(c => ({
+      id: `ant-${this._antIdCounter++}`, x: c.x, y: c.y, prevX: c.x, prevY: c.y,
+    }));
 
     // Place each anteater at a random land cell (overlaps allowed).
     this.anteaters = this.players.map(player => {
@@ -180,7 +183,7 @@ class SimulationEngine {
 
   getState() {
     return {
-      ants: this.ants.map(a => ({ x: a.x, y: a.y, prevX: a.prevX, prevY: a.prevY })),
+      ants: this.ants.map(a => ({ id: a.id, x: a.x, y: a.y, prevX: a.prevX, prevY: a.prevY })),
       anteaters: this.anteaters.map(a => ({
         x:     a.x,
         y:     a.y,

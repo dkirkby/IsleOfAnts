@@ -553,6 +553,11 @@ header h1 {
   background: rgba(184,80,58,0.12);
 }
 
+.btn-remove:disabled {
+  cursor: not-allowed;
+  opacity: 0.35;
+}
+
 /* ================================================================
    FUNCTION SIGNATURE + CODEMIRROR
    ================================================================ */

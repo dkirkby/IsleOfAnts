@@ -77,9 +77,9 @@ So `return (1, 0)` means "move one cell to the right and zero cells vertically" 
 
 ---
 
-## 5. Try All Eight Directions
+## 5. Try Different Directions
 
-Try each of the eight compass directions: N,NE,E,SE,S,SW,W,NW. For each one:
+The return value `(1, 0)` moves your ant east (E). Now program your ant to move in a different compass direction (N,NE,E,SE,S,SW,W,NW). For each direction:
 
 1. Change the return value.
 2. Click **Init** to reset the anteater to its starting position.
@@ -87,7 +87,7 @@ Try each of the eight compass directions: N,NE,E,SE,S,SW,W,NW. For each one:
 
 A few things to look for:
 
-- Diagonal moves work just like cardinal moves — the anteater steps one cell diagonally each turn.
+- Diagonal moves work just like horizontal and vertical moves — the anteater steps one cell diagonally each turn.
 - The arrow preview updates immediately after you click **Init**, before you click **Step**.
 - When the anteater reaches the shore in its direction of travel it simply stops; it does not "bounce."
 

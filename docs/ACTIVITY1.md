@@ -46,6 +46,8 @@ Here is what is happening each turn:
 - If a move would land on a cell already occupied by another ant, the move is also **canceled**.
 - Otherwise the ant moves to the new cell.
 
+You can follow the motion of a single ant by clicking on it to turn it red. Click on it again or click on a different cell to remove the highlight. Try this.
+
 Play automatically stops when **Max Turns** is reached (100 by default) or when all ants have been eaten. Since there are no players yet, the ants simply keep moving until the turn limit.
 
 > **Tip:** Running the simulation with no players added is a good way to study ant movement patterns without your anteater interfering.
@@ -58,7 +60,7 @@ Notice the **turn counter** and **ant count** displayed below the scoreboard —
 
 ## 4. Turn on Trails
 
-Click **Init** to reset, then check the **Show Trails** checkbox before clicking **Play** again.
+Click **Init** to reset, then check the **TRAILS** checkbox before clicking **Play** again.
 
 Now each ant has a short line attached to it. This line points **back toward the cell the ant just came from**, so it shows you the direction of its most recent move. Ants that did not move (because their intended move was blocked) have no trail line.
 

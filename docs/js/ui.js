@@ -78,7 +78,7 @@ speedSlider.addEventListener('input', () => {
 });
 
 showTrailsEl.addEventListener('change', () => {
-  if (_engine) _renderer.draw(_engine.getState(), _hoverHighlight, showTrailsEl.checked);
+  if (_engine) _renderer.draw(_engine.getState(), _hoverHighlight, showTrailsEl.checked, _highlightedAntId);
 });
 
 // ========================================================================
@@ -117,14 +117,14 @@ function _onParamEnter(span, card, param) {
 
   if (param !== 'current_turn') {
     _hoverHighlight = { eaterId, param };
-    _renderer.draw(state, _hoverHighlight, showTrailsEl.checked);
+    _renderer.draw(state, _hoverHighlight, showTrailsEl.checked, _highlightedAntId);
   }
 }
 
 function _onParamLeave() {
   _tooltip.classList.add('hidden');
   _hoverHighlight = null;
-  if (_engine && !_configDirty) _renderer.draw(_engine.getState(), null, showTrailsEl.checked);
+  if (_engine && !_configDirty) _renderer.draw(_engine.getState(), null, showTrailsEl.checked, _highlightedAntId);
 }
 
 function _positionTooltip(el) {
@@ -132,6 +132,27 @@ function _positionTooltip(el) {
   _tooltip.style.left = `${r.left + r.width / 2}px`;
   _tooltip.style.top  = `${r.top - 6}px`;
 }
+
+// ========================================================================
+// Ant highlight — click a grid cell to highlight/unhighlight an ant
+// ========================================================================
+_canvas.addEventListener('click', e => {
+  if (!_engine || _configDirty) return;
+  const state = _engine.getState();
+
+  const W    = _renderer._drawW || _canvas.width;
+  const H    = _renderer._drawH || _canvas.height;
+  const cell = Math.min(W, H) / (_renderer.gridSize + 1);
+  const PAD  = cell / 2;
+  const gx   = Math.floor((e.offsetX - PAD) / cell);
+  const gy   = Math.floor((e.offsetY - PAD) / cell);
+
+  if (gx < 0 || gx >= _renderer.gridSize || gy < 0 || gy >= _renderer.gridSize) return;
+
+  const ant = state.ants.find(a => a.x === gx && a.y === gy);
+  _highlightedAntId = (ant && ant.id !== _highlightedAntId) ? ant.id : null;
+  _renderer.draw(state, _hoverHighlight, showTrailsEl.checked, _highlightedAntId);
+});
 
 // ========================================================================
 // Player cards
@@ -217,6 +238,8 @@ function addPlayer(name) {
 }
 
 function _removePlayer(card, id) {
+  const name = card.querySelector('.player-name').value.trim() || 'unnamed';
+  if (!confirm(`Remove player "${name}"?`)) return;
   if (card._cm) card._cm.toTextArea();
   card.remove();
   document.querySelector(`#score-body [data-player-id="${id}"]`)?.remove();
@@ -229,11 +252,12 @@ function _removePlayer(card, id) {
 // ========================================================================
 // Simulation state
 // ========================================================================
-let _engine      = null;   // SimulationEngine | null
-let _running     = false;  // auto-play active
-let _timer       = null;   // setTimeout handle
-let _busy        = false;  // awaiting engine.step()
-let _configDirty = false;  // config changed after Init — Play blocked until re-Init
+let _engine           = null;   // SimulationEngine | null
+let _running          = false;  // auto-play active
+let _timer            = null;   // setTimeout handle
+let _busy             = false;  // awaiting engine.step()
+let _configDirty      = false;  // config changed after Init — Play blocked until re-Init
+let _highlightedAntId = null;   // ID of ant to render in red, or null
 
 // ── Splash screen ────────────────────────────────────────────────────────
 const _splash = document.getElementById('splash');
@@ -325,12 +349,13 @@ async function _initEngine() {
 
   await _engine.init();
 
-  _configDirty    = false;
-  _hoverHighlight = null;
+  _configDirty      = false;
+  _hoverHighlight   = null;
+  _highlightedAntId = null;
   const state = _engine.getState();
   _updateScores(state);
   _updateHUD(state);
-  _renderer.draw(state, null, showTrailsEl.checked);
+  _renderer.draw(state, null, showTrailsEl.checked, _highlightedAntId);
   _syncInputs();
   _syncEditors();
   _syncButtons();
@@ -345,7 +370,7 @@ async function _doStep() {
   await _engine.step();
 
   const state = _engine.getState();
-  _renderer.draw(state, _hoverHighlight, showTrailsEl.checked);
+  _renderer.draw(state, _hoverHighlight, showTrailsEl.checked, _highlightedAntId);
   _updateScores(state);
   _updateHUD(state);
   _busy = false;
@@ -436,7 +461,7 @@ let _canvasUserWidth = null;   // null = fill available width (CSS default)
 function _rescaleAndDraw() {
   _renderer._scaleForDPR();
   const state = (_engine && !_configDirty) ? _engine.getState() : null;
-  _renderer.draw(state, _hoverHighlight, showTrailsEl.checked);
+  _renderer.draw(state, _hoverHighlight, showTrailsEl.checked, _highlightedAntId);
   _updateHUD(state);
 }
 

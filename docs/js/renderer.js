@@ -13,8 +13,10 @@
 // Colours that match the Tropical Terminal theme.
 const _WATER_FILL  = '#0b3d5c';   // tropical ocean blue
 const _ISLAND_FILL = '#c9a84c';   // sandy yellow
-const _ANT_FILL    = '#1a0d04';   // dark brown, like a real ant
-const _ANT_GLOW    = 'rgba(0,0,0,0.35)';
+const _ANT_FILL      = '#1a0d04';   // dark brown, like a real ant
+const _ANT_GLOW      = 'rgba(0,0,0,0.35)';
+const _ANT_HL_FILL   = '#e53935';   // red — highlighted ant
+const _ANT_HL_GLOW   = 'rgba(200,0,0,0.45)';
 const _VEC_COLOR = 'rgba(255,255,255,0.88)';
 
 class Renderer {
@@ -33,7 +35,7 @@ class Renderer {
   // draw — full redraw every frame
   // -----------------------------------------------------------------------
 
-  draw(state, highlight = null, showTrails = false) {
+  draw(state, highlight = null, showTrails = false, highlightedAntId = null) {
     const { ctx, canvas, gridSize } = this;
     // Use CSS logical dimensions (set by _scaleForDPR).
     // canvas.width/height are physical pixels and must NOT be used here
@@ -115,7 +117,7 @@ class Renderer {
 
 
     // ── 4. Ants ──────────────────────────────────────────────────────────
-    const antR = Math.max(1, cell * 0.11);
+    const antR = Math.max(1, cell * 0.165);
 
     // Movement trails — from current cell centre to the cell boundary in the
     // direction of the previous cell (half a cell in that direction).
@@ -136,21 +138,36 @@ class Renderer {
       ctx.globalAlpha = 1;
     }
 
-    // Ant dots.
+    // Ant dots — normal ants in batch, highlighted ant drawn on top in red.
     ctx.save();
     ctx.shadowColor = _ANT_GLOW;
     ctx.shadowBlur  = antR * 2.5;
     ctx.fillStyle   = _ANT_FILL;
-
-    // Batch all ants into one path for performance.
     ctx.beginPath();
     for (const ant of state.ants) {
+      if (ant.id === highlightedAntId) continue;
       const ax = cx(ant.x), ay = cy(ant.y);
       ctx.moveTo(ax + antR, ay);
       ctx.arc(ax, ay, antR, 0, Math.PI * 2);
     }
     ctx.fill();
     ctx.restore();
+
+    if (highlightedAntId) {
+      const hAnt = state.ants.find(a => a.id === highlightedAntId);
+      if (hAnt) {
+        const ax = cx(hAnt.x), ay = cy(hAnt.y);
+        ctx.save();
+        ctx.shadowColor = _ANT_HL_GLOW;
+        ctx.shadowBlur  = antR * 3;
+        ctx.fillStyle   = _ANT_HL_FILL;
+        ctx.beginPath();
+        ctx.moveTo(ax + antR, ay);
+        ctx.arc(ax, ay, antR, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
 
     // ── 5. Anteaters ─────────────────────────────────────────────────────
     const eaterR = Math.max(4, cell * 0.38);
