@@ -143,6 +143,12 @@ async function seedSkulkt(seed) {
  */
 function compilePlayer(player) {
   const body = player.cm.getValue();
+  const lines = body.split('\n');
+  for (let i = 0; i < lines.length; i++) {
+    if (/^\s*import\s/.test(lines[i]) || /^\s*from\s+\S+\s+import\s/.test(lines[i])) {
+      return { ok: false, error: `Line ${i + 1}: import statements are not allowed` };
+    }
+  }
   const src  = _buildScript(body, null);
   try {
     Sk.configure({ read: _builtinRead });
