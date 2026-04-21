@@ -26,7 +26,6 @@ docs/
   js/skulkt-bridge.js — Skulkt execution bridge; exports seedSkulkt, compilePlayer, callMove
   js/renderer.js      — Renderer class (canvas)
   js/ui.js            — DOM wiring, player management, button handlers
-  TUTORIAL.md         — tutorial outline (not rendered; used as a planning doc)
   ACTIVITY1.md        — Activity 1 content rendered by tutorial.html
   ACTIVITY2.md        — Activity 2 content
   ACTIVITY3.md        — Activity 3 content

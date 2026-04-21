@@ -358,8 +358,8 @@
     if (!link) return;
     const href = link.getAttribute('href');
     if (!href) return;
-    // Match ACTIVITY*.md or TUTORIAL.md links
-    const m = href.match(/^(ACTIVITY\d+|TUTORIAL)\.md$/);
+    // Match ACTIVITY*.md links
+    const m = href.match(/^(ACTIVITY\d+)\.md$/);
     if (!m) return;
     e.preventDefault();
     const page = m[1];
