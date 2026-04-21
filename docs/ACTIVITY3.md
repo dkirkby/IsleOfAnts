@@ -43,6 +43,8 @@ Click **Step** several times. After each step, check how the argument values hav
 
 ## 3. Chase the Nearest Ant
 
+If you stepped through the simulation in the previous section, the code editor is now locked. Click **Init** first to reset and unlock the editor.
+
 Now you have everything you need to write a useful strategy: move toward the nearest ant each turn.
 
 The `nearest_ant` tuple already tells you the direction — it points from you to the ant. If you return that direction, your anteater will step toward the ant.

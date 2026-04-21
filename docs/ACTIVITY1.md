@@ -81,13 +81,13 @@ Stepping is most useful later when you are debugging your own code, but it is wo
 
 ## 6. Experiment with Settings
 
-The simulation settings appear along the top of the window. These can only be changed when there is no (paused or running) simulation in progress. Click **Pause** if the simulation is running. Click **Init** to cancel the current simulation. Now try adjusting the settings in the Setup panel:
+The simulation settings appear along the top of the window. Once turns have been taken, the settings are locked — you cannot change them while the simulation is in progress. If the simulation is running, click **Pause**, then click **Init** to reset. Now try adjusting the settings in the Setup panel:
 
 - Change **Grid** to a smaller value (e.g., 20) and click **Init** — the island is smaller and the ant population is lower.
 - Change **Grid** to a larger value (e.g., 80) and click **Init** — more land, more ants, slower to scroll through.
 - Change **Max Turns** to 20, click **Init**, then **Play** — the simulation ends much sooner.
 
-> **Important:** changing any setting in the Setup panel will clear the display and requires a new **Init** before it takes effect, and you can **Play** or **Step** through a new simulation.
+> **Important:** changing any setting in the Setup panel will clear the display and requires a new **Init** before you can **Play** or **Step**.
 
 ---
 

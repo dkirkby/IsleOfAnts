@@ -38,13 +38,13 @@ Click **Play** and watch what happens:
 
 So even with the default do-nothing code you can score points — purely by luck, as ants stumble into you.
 
-Click **Stop** when you are done watching.
+Click **Pause** when you are done watching.
 
 ---
 
 ## 3. Make Your First Move
 
-You can only edit the code when there is no simulation in progress. If the simulation is still running, click **Pause** and then **Init** to reset.
+You can only edit the code when no turns have been taken — the editor is locked once the simulation has started. If turns have been taken, click **Init** to reset (if the simulation is auto-playing, click **Pause** first). After editing code, you will need to click **Init** again before you can **Play** or **Step**.
 
 Change the single line of code from:
 

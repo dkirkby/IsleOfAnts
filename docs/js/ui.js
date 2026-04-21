@@ -193,7 +193,12 @@ function addPlayer(name) {
   card._cm = cm;
 
   cm.on('change', () => {
-    if (!_configDirty) { _configDirty = true; _syncButtons(); }
+    if (!_configDirty) {
+      _configDirty = true;
+      _renderer.draw(null);
+      _updateHUD(null);
+      _syncButtons();
+    }
   });
 
   // Scoreboard row
@@ -254,7 +259,10 @@ function _syncInputs() {
 function _syncEditors() {
   const editable = !_engine || _engine.turn === 0;
   document.querySelectorAll('.player-card').forEach(card => {
-    if (card._cm) card._cm.setOption('readOnly', editable ? false : 'nocursor');
+    if (card._cm) {
+      card._cm.setOption('readOnly', editable ? false : 'nocursor');
+      card._cm.getWrapperElement().classList.toggle('is-locked', !editable);
+    }
   });
 }
 

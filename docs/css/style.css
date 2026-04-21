@@ -140,6 +140,11 @@ header h1 {
   transition: border-color 0.15s;
 }
 
+.header-field:has(input:disabled),
+.header-field input[type="number"]:disabled {
+  cursor: not-allowed;
+}
+
 .header-field input[type="number"]:focus {
   outline: none;
   border-color: var(--accent);
@@ -601,6 +606,9 @@ header h1 {
 }
 
 /* CodeMirror — override to match jungle theme */
+.CodeMirror.is-locked,
+.CodeMirror.is-locked * { cursor: not-allowed !important; }
+
 .CodeMirror {
   border: 1px solid var(--border);
   border-radius: 0 0 var(--radius) var(--radius);
