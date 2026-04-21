@@ -22,7 +22,7 @@ const _TIMEOUT = 200;    // ms
 // Belt-and-suspenders: block any import not already provided by the wrapper,
 // even if the pre-scan in compilePlayer was somehow bypassed.
 (function() {
-  const _allowed = new Set(['math', 'random']);
+  const _allowed = new Set(['math', 'random', 'sys']);
   const _real = Sk.importModule.bind(Sk);
   Sk.importModule = function(name, ...args) {
     if (!_allowed.has(name))
