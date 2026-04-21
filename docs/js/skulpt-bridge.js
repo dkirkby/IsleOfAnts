@@ -19,6 +19,18 @@
 const _OFFSET = 4;       // wrapper lines before student code (3 header lines + def line)
 const _TIMEOUT = 200;    // ms
 
+// Belt-and-suspenders: block any import not already provided by the wrapper,
+// even if the pre-scan in compilePlayer was somehow bypassed.
+(function() {
+  const _allowed = new Set(['math', 'random']);
+  const _real = Sk.importModule.bind(Sk);
+  Sk.importModule = function(name, ...args) {
+    if (!_allowed.has(name))
+      throw new Sk.builtin.ImportError(`import of '${name}' is not allowed`);
+    return _real(name, ...args);
+  };
+}());
+
 // ---------------------------------------------------------------------------
 // Internal helpers
 // ---------------------------------------------------------------------------
