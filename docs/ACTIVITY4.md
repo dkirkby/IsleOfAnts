@@ -75,3 +75,4 @@ Before moving on, make sure you can answer these questions:
 ---
 
 *Previous: [Activity 3 — Chase the Nearest Ant](ACTIVITY3.md)*
+*Next: [Activity 5 — Strategies](ACTIVITY5.md)*
