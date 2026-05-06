@@ -235,6 +235,8 @@ function addPlayer(name) {
   card.querySelector('.player-name').addEventListener('input', e => {
     tr.querySelector('.score-player-name').textContent = e.target.value || '(unnamed)';
   });
+
+  return card;
 }
 
 function _removePlayer(card, id) {
@@ -258,6 +260,7 @@ let _timer            = null;   // setTimeout handle
 let _busy             = false;  // awaiting engine.step()
 let _configDirty      = false;  // config changed after Init — Play blocked until re-Init
 let _highlightedAntId = null;   // ID of ant to render in red, or null
+let _inactivePlayers  = [];     // players excluded due to syntax errors
 
 // ── Splash screen ────────────────────────────────────────────────────────
 const _splash = document.getElementById('splash');
@@ -278,6 +281,7 @@ function _syncInputs() {
   antDensityInput.disabled = !editable;
   document.getElementById('add-player-btn').disabled = !editable;
   document.querySelectorAll('.btn-remove').forEach(btn => btn.disabled = !editable);
+  document.getElementById('tournament-btn').disabled = TournamentManager.isActive() ? false : !editable;
 }
 
 function _syncEditors() {
@@ -334,14 +338,12 @@ function _clearDebug() {
 }
 
 // ── Engine lifecycle ─────────────────────────────────────────────────────
-async function _initEngine() {
-  const players    = getPlayers();
+async function _initEngine(players) {
   const gridSize   = Math.max(5,  Math.min(50,   parseInt(gridSizeInput.value, 10) || 30));
   const maxTurns   = Math.max(10, Math.min(1000, parseInt(document.getElementById('max-turns').value,  10) || 100));
   const antDensity = Math.max(5,  Math.min(30,   parseInt(document.getElementById('ant-density').value, 10) || 15)) / 100;
   const seed       = Date.now() >>> 0;
 
-  _clearDebug();
   document.getElementById('result-message').className = 'hidden';
 
   _engine = new SimulationEngine({ gridSize, maxTurns, antDensity, players, seed });
@@ -354,6 +356,10 @@ async function _initEngine() {
   _highlightedAntId = null;
   const state = _engine.getState();
   _updateScores(state);
+  for (const p of _inactivePlayers) {
+    const td = document.querySelector(`#score-body [data-player-id="${p.id}"] .score-value`);
+    if (td) td.textContent = '0';
+  }
   _updateHUD(state);
   _renderer.draw(state, null, showTrailsEl.checked, _highlightedAntId);
   _syncInputs();
@@ -380,6 +386,17 @@ async function _doStep() {
     clearTimeout(_timer);
     _timer = null;
     _showResult(state.winner);
+    const tournamentState = _inactivePlayers.length === 0 ? state : {
+      ...state,
+      anteaters: [
+        ...state.anteaters,
+        ..._inactivePlayers.map(p => ({ name: p.name, score: 0 })),
+      ],
+    };
+    if (TournamentManager.recordResult(tournamentState)) {
+      _syncInputs();
+      TournamentManager.openSchedule();
+    }
   }
   _syncInputs();
   _syncEditors();
@@ -399,31 +416,33 @@ function _scheduleNext() {
 // Button handlers
 // ========================================================================
 
-// Init — validate first; stop if any errors; otherwise initialise engine
+// Init — compile all players; active players join the simulation, others are
+// shown with strikethrough and score 0
 btnInit.addEventListener('click', async () => {
   if (_running) return;
 
-  // Implicit validation before initialising
-  const players = getPlayers();
   _clearDebug();
-  let valid = true;
-  for (const p of players) {
+  _inactivePlayers = [];
+  const activePlayers = [];
+
+  for (const p of getPlayers()) {
+    const nameInput = document.querySelector(`.player-card[data-player-id="${p.id}"] .player-name`);
+    const scoreName = document.querySelector(`#score-body [data-player-id="${p.id}"] .score-player-name`);
     const res = compilePlayer(p);
     if (!res.ok) {
+      nameInput?.classList.add('is-error');
+      scoreName?.classList.add('is-error');
       const el = document.getElementById(`debug-${p.id}`);
       if (el) el.textContent = `[SYNTAX ERROR] ${res.error}\n`;
-      valid = false;
+      _inactivePlayers.push(p);
+    } else {
+      nameInput?.classList.remove('is-error');
+      scoreName?.classList.remove('is-error');
+      activePlayers.push(p);
     }
   }
-  if (!valid) {
-    _engine = null;
-    _syncInputs();
-    _syncEditors();
-    _syncButtons();
-    return;
-  }
 
-  await _initEngine();
+  await _initEngine(activePlayers);
 });
 
 // Play — resume auto-play from current state (requires Init first)
@@ -434,13 +453,9 @@ btnPlay.addEventListener('click', () => {
   _scheduleNext();
 });
 
-// Step — init on first click (shows placement), then advance one turn per click
+// Step — advance one turn (requires prior Init; button disabled otherwise)
 btnStep.addEventListener('click', async () => {
   if (_busy || _running) return;
-  if (!_engine) {
-    await _initEngine();  // show initial placement; user clicks again to advance
-    return;
-  }
   await _doStep();
 });
 
@@ -509,8 +524,45 @@ window.addEventListener('mouseup', () => {
   document.body.style.userSelect = '';
 });
 
+// ========================================================================
+// Tournament integration
+// ========================================================================
+
+function loadTournamentGame(players) {
+  if (_running) {
+    _running = false;
+    clearTimeout(_timer);
+    _timer = null;
+  }
+  _engine = null;
+
+  // Remove all player cards without confirmation
+  document.querySelectorAll('.player-card').forEach(card => {
+    if (card._cm) card._cm.toTextArea();
+    const id = card.dataset.playerId;
+    document.querySelector(`#score-body [data-player-id="${id}"]`)?.remove();
+    card.remove();
+  });
+
+  // Add tournament players with their code
+  for (const p of players) {
+    const card = addPlayer(p.name);
+    if (p.code) card._cm.setValue(p.code);
+  }
+
+  _configDirty = true;
+  _renderer.draw(null);
+  _updateHUD(null);
+  _syncInputs();
+  _syncEditors();
+  _syncButtons();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
 // Initial state
 _syncInputs();
 _syncEditors();
 _syncButtons();
 _applyCanvasWidth(window.innerHeight / 2);
+
+TournamentManager.init(loadTournamentGame);
