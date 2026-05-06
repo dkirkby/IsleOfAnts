@@ -864,7 +864,8 @@ header h1 {
   padding-bottom: 2px;
 }
 
-.bracket-round-label--champion {
+.bracket-round-label--champion,
+.bracket-round-label--podium {
   color: var(--accent);
 }
 
@@ -888,7 +889,8 @@ header h1 {
 .bracket-game--active   { border-color: var(--accent); background: rgba(200,150,30,0.05); }
 .bracket-game--complete { border-color: var(--border-hi); }
 .bracket-game--bye      { opacity: 0.55; }
-.bracket-game--champion { border-color: var(--success); background: rgba(78,184,106,0.07); }
+.bracket-game--champion,
+.bracket-game--podium   { border-color: var(--success); background: rgba(78,184,106,0.07); }
 
 .bracket-game--clickable {
   cursor: pointer;
@@ -914,6 +916,9 @@ header h1 {
 .bracket-player--winner   { color: var(--accent); font-weight: 600; }
 .bracket-player--bye      { color: var(--text-dim); font-style: italic; }
 .bracket-player--champion { color: var(--success); font-weight: 600; font-size: 0.85rem; }
+.bracket-player--podium-1 { color: var(--success); font-weight: 700; }
+.bracket-player--podium-2 { color: var(--accent);  font-weight: 600; }
+.bracket-player--podium-3 { color: var(--text-dim); }
 
 .bracket-bye-label {
   font-size: 0.62rem;

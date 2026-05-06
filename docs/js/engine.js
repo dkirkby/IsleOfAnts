@@ -78,9 +78,11 @@ class SimulationEngine {
       id: `ant-${this._antIdCounter++}`, x: c.x, y: c.y, prevX: c.x, prevY: c.y,
     }));
 
-    // Place each anteater at a random land cell (overlaps allowed).
-    this.anteaters = this.players.map(player => {
-      const c = landCells[globalRNG.nextInt(landCells.length)];
+    // Place each anteater on a distinct land cell not already occupied by an ant or another anteater.
+    const remaining = landCells.slice(numAnts);
+    globalRNG.shuffle(remaining);
+    this.anteaters = this.players.map((player, i) => {
+      const c = remaining[i % remaining.length];
       return {
         player, x: c.x, y: c.y, prevX: c.x, prevY: c.y, score: 0,
         lastNearestAnt: null, lastNearestAnteater: null, lastNearestShore: null,
@@ -140,6 +142,7 @@ class SimulationEngine {
     // Moves were pre-computed by _precomputeMoves(); apply them now.
     // Randomise execution order each turn (consumed by globalRNG for determinism).
     const order = globalRNG.shuffle([...this.anteaters]);
+    const eaterOccupied = new Set(this.anteaters.map(a => _key(a.x, a.y)));
 
     for (const eater of order) {
       // Snap the pre-computed raw move to the nearest compass direction and apply.
@@ -150,9 +153,12 @@ class SimulationEngine {
       eater.prevY = eater.y;
       const nx = eater.x + dx;
       const ny = eater.y - dy;   // student uses y-up; grid uses y-down
-      if (nx >= 0 && nx < gridSize && ny >= 0 && ny < gridSize && !this.islandMask[ny][nx]) {
+      if (nx >= 0 && nx < gridSize && ny >= 0 && ny < gridSize &&
+          !this.islandMask[ny][nx] && !eaterOccupied.has(_key(nx, ny))) {
+        eaterOccupied.delete(_key(eater.x, eater.y));
         eater.x = nx;
         eater.y = ny;
+        eaterOccupied.add(_key(nx, ny));
       }
     }
 
