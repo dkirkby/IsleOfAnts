@@ -62,7 +62,11 @@ const TournamentManager = (() => {
     for (let i = 0; i < lines.length; i++) {
       if (lines[i].trimStart().startsWith('def move(')) { startIdx = i + 1; break; }
     }
-    return lines.slice(startIdx).map(l => l.startsWith('    ') ? l.slice(4) : l).join('\n').trim();
+    const bodyLines = lines.slice(startIdx);
+    const nonEmpty = bodyLines.filter(l => l.trim().length > 0);
+    const minIndent = nonEmpty.length === 0 ? 0
+      : nonEmpty.reduce((m, l) => Math.min(m, l.match(/^( *)/)[1].length), Infinity);
+    return bodyLines.map(l => l.slice(minIndent)).join('\n').trim();
   }
 
   function _validatePlayers(raw) {
